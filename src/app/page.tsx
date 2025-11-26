@@ -70,8 +70,6 @@ export default function Home() {
     const selectColumn: ColumnDef<User> = {
       id: "select",
       size: 48, // Fixed width for checkbox column
-      minSize: 48,
-      maxSize: 48,
       header: ({ table }) => (
         <div className="h-full flex items-center">
           <Checkbox
@@ -197,7 +195,8 @@ export default function Home() {
         <UserIcon size={16} className="text-neutral-900" />
         <p className="text-sm font-medium text-neutral-900">People</p>
       </div>
-      <div className="bg-white w-full h-[95%] border rounded-md flex flex-col p-2 gap-2">
+
+      <div className="bg-white w-full border rounded-md flex flex-col p-2 gap-2">
         <div className="flex items-center justify-between">
           <div>
             <ViewSwitcher itemCount={data.length} />

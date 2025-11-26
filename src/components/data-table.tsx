@@ -6,11 +6,12 @@ import {
   getCoreRowModel,
   RowSelectionState,
   useReactTable,
+  ColumnPinningState,
 } from "@tanstack/react-table";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { Table, TableBody, TableHeader, TableRow } from "@/components/ui/table";
+import { TableBody, TableHeader, TableRow } from "@/components/ui/table";
 
 import { useMemo, useRef, useState } from "react";
 
@@ -27,8 +28,11 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: ["select", "fullName"],
+    right: [],
+  });
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const outerContainerRef = useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
     data: data,
@@ -38,9 +42,12 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
     enableColumnResizing: true,
+    enableColumnPinning: true,
     onRowSelectionChange: setRowSelection,
+    onColumnPinningChange: setColumnPinning,
     state: {
       rowSelection,
+      columnPinning,
     },
   });
 
@@ -57,87 +64,60 @@ export function DataTable<TData, TValue>({
   });
   const virtualRows = rowVirtualizer.getVirtualItems();
 
-  const tableProps = {
-    style: {
-      width: `${totalTableWidth}px`,
-      tableLayout: "fixed" as const,
-    },
-  };
-
   return (
     <div
-      className="flex flex-col border rounded-sm"
+      className="border-t border-b"
       style={{
-        maxWidth: "100%",
-        overflow: "auto",
-        overflowY: "hidden",
+        height: "800px", // Set a fixed height for the container to enable virtual scrolling
+        width: "100%",
+        overflow: "auto", // Enable both X and Y scrolling
+        position: "relative",
       }}
-      ref={outerContainerRef}
+      ref={tableContainerRef}
     >
-      <div style={{ width: Math.max(totalTableWidth + 10, 100) + "px" }}>
-        <div className="overflow-hidden">
-          <Table {...tableProps}>
-            <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="flex w-full">
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <DefaultHeader key={header.column.id} header={header} />
-                    );
-                  })}
-                </TableRow>
+      <table
+        style={{
+          width: `${totalTableWidth}px`,
+          tableLayout: "fixed",
+        }}
+        className="w-full caption-bottom text-sm text-left"
+      >
+        <TableHeader className="sticky top-0 z-20 bg-background shadow-sm">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className="flex w-full">
+              {headerGroup.headers.map((header) => (
+                <DefaultHeader key={header.column.id} header={header} />
               ))}
-            </TableHeader>
-          </Table>
-        </div>
-        <div
-          ref={tableContainerRef}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody
           style={{
-            width: Math.max(totalTableWidth + 10, 100) + "px",
-            height: `1000px`,
-            overflowY: "auto",
-            overflowX: "hidden", // Prevent horizontal scrolling in the body
-          }}
-          onWheel={(e) => {
-            // If this is a horizontal scroll attempt, let the parent handle it
-            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-              e.stopPropagation();
-              if (outerContainerRef.current) {
-                outerContainerRef.current.scrollLeft += e.deltaX;
-              }
-            }
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
           }}
         >
-          <Table {...tableProps}>
-            <TableBody
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                width: "100%",
-                position: "relative",
-              }}
-            >
-              {virtualRows.map((virtualItem) => {
-                const row = rows[virtualItem.index];
-                return (
-                  <TableRow
-                    key={virtualItem.key}
-                    className="absolute top-0 left-0 flex w-full items-center"
-                    style={{
-                      height: `${virtualItem.size}px`,
-                      transform: `translateY(${virtualItem.start}px)`,
-                    }}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      return <DefaultCell key={cell.id} cell={cell} />;
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+          {virtualRows.map((virtualItem) => {
+            const row = rows[virtualItem.index];
+            return (
+              <TableRow
+                key={virtualItem.key}
+                className="absolute top-0 left-0 flex w-full items-center group"
+                style={{
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <DefaultCell key={cell.id} cell={cell} />
+                ))}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </table>
     </div>
   );
 }
