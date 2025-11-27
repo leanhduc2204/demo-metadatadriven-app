@@ -30,7 +30,7 @@ export function DefaultHeader<TData>({
             : undefined,
       }}
     >
-      <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-full text-gray-500">
+      <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-full text-neutral-500">
         {flexRender(header.column.columnDef.header, header.getContext())}
       </span>
       {header.column.id !== "select" && (

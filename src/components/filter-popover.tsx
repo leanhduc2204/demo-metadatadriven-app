@@ -39,7 +39,7 @@ export function FilterPopover({
         <Button
           variant={"ghost"}
           size={"sm"}
-          className="text-neutral-500 font-normal"
+          className="text-neutral-500"
           onClick={() => {}}
         >
           Filter
@@ -52,10 +52,10 @@ export function FilterPopover({
             size={"icon-sm"}
             onClick={() => setOpen(false)}
           >
-            <X size={12} className="text-neutral-400" />
+            <X className="text-neutral-400" />
           </Button>
 
-          <span className="font-normal text-neutral-700 text-sm">Filter</span>
+          <span className="text-neutral-700 text-sm">Filter</span>
         </div>
         <Separator />
         <div>
@@ -117,10 +117,10 @@ export function FilterPopover({
                             <Button
                               key={field}
                               variant={"ghost"}
-                              className="justify-start text-neutral-500 text-sm font-light"
+                              className="justify-start text-neutral-500 text-sm font-light gap-2"
                               size={"sm"}
                             >
-                              <Icon size={10} />
+                              <Icon />
                               <span>{config?.label || field}</span>
                             </Button>
                           );
@@ -151,10 +151,10 @@ export function FilterPopover({
                         <Button
                           key={field}
                           variant={"ghost"}
-                          className="justify-start text-neutral-500 text-sm font-light"
+                          className="justify-start text-neutral-500 text-sm font-light gap-2"
                           size={"sm"}
                         >
-                          <Icon size={10} />
+                          <Icon />
                           <span>{config?.label || field}</span>
                         </Button>
                       );
@@ -172,7 +172,7 @@ export function FilterPopover({
             size={"sm"}
             className="justify-start text-neutral-500 text-sm font-light"
           >
-            <Search size={10} />
+            <Search />
             Search any field
           </Button>
           <Button
@@ -180,7 +180,7 @@ export function FilterPopover({
             size={"sm"}
             className="justify-start text-neutral-500 text-sm font-light"
           >
-            <Funnel size={10} />
+            <Funnel />
             Advanced filter
           </Button>
         </div>

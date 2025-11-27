@@ -124,7 +124,7 @@ export default function Home() {
                     <AvatarImage src={avatar} alt={String(value || "")} />
                   ) : null}
                   <AvatarFallback className="bg-gray-200">
-                    <UserIcon size={16} className="text-gray-500" />
+                    <UserIcon className="text-neutral-500" />
                   </AvatarFallback>
                 </Avatar>
                 <span>{String(value || "")}</span>
@@ -144,7 +144,7 @@ export default function Home() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant={"ghost"} size={"icon-sm"}>
-              <Plus size={16} />
+              <Plus />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
@@ -163,7 +163,7 @@ export default function Home() {
                         setVisibleFields([...visibleFields, field]);
                       }}
                     >
-                      <Icon size={16} />
+                      <Icon />
                       <span>{config?.label || field}</span>
                     </DropdownMenuItem>
                   );
@@ -172,7 +172,7 @@ export default function Home() {
                 (field) => !visibleFields.includes(field) && field !== "id"
               ).length === 0 && (
                 <DropdownMenuItem disabled>
-                  <span className="text-gray-400">
+                  <span className="text-neutral-400">
                     No hidden fields available
                   </span>
                 </DropdownMenuItem>
