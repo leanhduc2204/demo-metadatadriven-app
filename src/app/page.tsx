@@ -2,55 +2,21 @@
 "use client";
 
 import { DataTable } from "@/components/data-table";
+import { FilterItemBadge } from "@/components/filter-item-badge";
 import { FilterPopover } from "@/components/filter-popover";
-import { SortPopover } from "@/components/sort-popover";
-import { ViewSwitcher } from "@/components/view-switcher";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { data, User } from "@/lib/data";
-
-import { SortBy } from "@/types/common";
-
-import { type ColumnDef } from "@tanstack/react-table";
-
-import {
-  ArrowDown01,
-  BriefcaseBusiness,
-  Building,
-  Calendar1,
-  History,
-  Mail,
-  Map,
-  Phone,
-  Plus,
-  User as UserIcon,
-} from "lucide-react";
-
-import { useMemo, useState } from "react";
 import { OptionsPopover } from "@/components/options-popover";
-
-// Mapping các field với label và icon
-type IconComponent = typeof UserIcon;
-const fieldConfig: Record<string, { label: string; icon: IconComponent }> = {
-  id: { label: "Id", icon: ArrowDown01 },
-  fullName: { label: "Name", icon: UserIcon },
-  emails: { label: "Emails", icon: Mail },
-  company: { label: "Company", icon: Building },
-  phones: { label: "Phones", icon: Phone },
-  createdBy: { label: "Created by", icon: History },
-  creationDate: { label: "Creation date", icon: Calendar1 },
-  city: { label: "City", icon: Map },
-  jobTitle: { label: "Job Title", icon: BriefcaseBusiness },
-};
+import { SortItemBadge } from "@/components/sort-item-badge";
+import { SortPopover } from "@/components/sort-popover";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ViewSwitcher } from "@/components/view-switcher";
+import { useUserColumns } from "@/hooks/use-user-columns";
+import { data, User } from "@/lib/data";
+import { fieldConfig } from "@/lib/field-config";
+import { useFilterStore } from "@/stores/use-filter-store";
+import { useSortStore } from "@/stores/use-sort-store";
+import { Plus, User as UserIcon } from "lucide-react";
+import { useState } from "react";
 
 export default function Home() {
   const [visibleFields, setVisibleFields] = useState<string[]>([
@@ -63,131 +29,12 @@ export default function Home() {
   ]);
   const [searchFields, setSearchFields] = useState<string>("");
   const [sortFields, setSortFields] = useState<string>("");
-  const [sortBy, setSortBy] = useState<SortBy>(SortBy.ASC);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Tạo columns dựa trên visibleFields
-  const columns = useMemo<ColumnDef<User>[]>(() => {
-    const selectColumn: ColumnDef<User> = {
-      id: "select",
-      size: 48, // Fixed width for checkbox column
-      header: ({ table }) => (
-        <div className="h-full flex items-center">
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        </div>
-      ),
-      cell: ({ row }) => (
-        <div className="h-full flex items-center">
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label={`Select row ${row.original.id}`}
-          />
-        </div>
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    };
+  const { filters, clearFilters } = useFilterStore();
+  const { sortConditions, clearSortConditions } = useSortStore();
 
-    const dataColumns: ColumnDef<User>[] = visibleFields.map((field) => {
-      const config = fieldConfig[field];
-      const Icon = config?.icon || UserIcon;
-      const isNameField = field === "fullName";
-
-      return {
-        id: field,
-        minSize: 200,
-        accessorKey: field,
-        header: () => (
-          <div className="flex items-center gap-2">
-            <Icon size={16} />
-            <span>{config?.label || field}</span>
-          </div>
-        ),
-        cell: ({ row }) => {
-          const value = row.original[field as keyof User];
-          if (Array.isArray(value)) {
-            return value.join(", ");
-          }
-
-          if (isNameField) {
-            const avatar = row.original.avatar;
-            return (
-              <div className="flex items-center gap-2">
-                <Avatar className="size-4">
-                  {avatar ? (
-                    <AvatarImage src={avatar} alt={String(value || "")} />
-                  ) : null}
-                  <AvatarFallback className="bg-gray-200">
-                    <UserIcon className="text-neutral-500" />
-                  </AvatarFallback>
-                </Avatar>
-                <span>{String(value || "")}</span>
-              </div>
-            );
-          }
-
-          return String(value || "");
-        },
-      };
-    });
-
-    const addColumnColumn: ColumnDef<User> = {
-      id: "add-column",
-      minSize: 1000,
-      header: () => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"ghost"} size={"icon-sm"}>
-              <Plus />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuGroup>
-              {Object.keys(fieldConfig)
-                .filter(
-                  (field) => !visibleFields.includes(field) && field !== "id"
-                )
-                .map((field) => {
-                  const config = fieldConfig[field];
-                  const Icon = config?.icon || UserIcon;
-                  return (
-                    <DropdownMenuItem
-                      key={field}
-                      onClick={() => {
-                        setVisibleFields([...visibleFields, field]);
-                      }}
-                    >
-                      <Icon />
-                      <span>{config?.label || field}</span>
-                    </DropdownMenuItem>
-                  );
-                })}
-              {Object.keys(fieldConfig).filter(
-                (field) => !visibleFields.includes(field) && field !== "id"
-              ).length === 0 && (
-                <DropdownMenuItem disabled>
-                  <span className="text-neutral-400">
-                    No hidden fields available
-                  </span>
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-      cell: () => null,
-      enableSorting: false,
-      enableHiding: false,
-    };
-
-    return [selectColumn, ...dataColumns, addColumnColumn];
-  }, [visibleFields]);
+  const columns = useUserColumns({ visibleFields, setVisibleFields });
 
   return (
     <div className="w-full h-full bg-gray-100 p-4 flex flex-col gap-4">
@@ -196,8 +43,8 @@ export default function Home() {
         <p className="text-sm font-medium text-neutral-900">People</p>
       </div>
 
-      <div className="bg-white w-full border rounded-md flex flex-col p-2 gap-2">
-        <div className="flex items-center justify-between">
+      <div className="bg-white w-full border rounded-md flex flex-col py-2">
+        <div className="flex items-center justify-between px-2 mb-2">
           <div>
             <ViewSwitcher itemCount={data.length} />
           </div>
@@ -209,6 +56,8 @@ export default function Home() {
                 visibleFields={visibleFields}
                 searchFields={searchFields}
                 onSearchFieldsChange={setSearchFields}
+                open={isFilterOpen}
+                onOpenChange={setIsFilterOpen}
               />
             </div>
 
@@ -218,8 +67,6 @@ export default function Home() {
                 visibleFields={visibleFields}
                 sortFields={sortFields}
                 onSortFieldsChange={setSortFields}
-                sortBy={sortBy}
-                onSortByChange={setSortBy}
               />
             </div>
 
@@ -240,6 +87,73 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {((filters.length > 0 &&
+          filters.some((filter) => filter.value !== "")) ||
+          sortConditions.length > 0) && (
+          <>
+            <Separator />
+            <div className="flex items-center justify-between p-2">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  {sortConditions.map((sortCondition) => {
+                    return (
+                      <SortItemBadge
+                        key={sortCondition.id}
+                        sortCondition={sortCondition}
+                        label={
+                          fieldConfig[sortCondition.field]?.label ||
+                          sortCondition.field
+                        }
+                      />
+                    );
+                  })}
+                </div>
+
+                {sortConditions.length > 0 && filters.length > 0 && (
+                  <div className="w-[1.5px] h-2 bg-neutral-200" />
+                )}
+
+                <div className="flex items-center gap-2">
+                  {filters.map((filter) => {
+                    const Icon = fieldConfig[filter.field]?.icon || UserIcon;
+                    return (
+                      <FilterItemBadge
+                        key={filter.id}
+                        filter={filter}
+                        icon={<Icon />}
+                        label={fieldConfig[filter.field]?.label || filter.field}
+                      />
+                    );
+                  })}
+                  <Button
+                    variant={"ghost"}
+                    size={"sm"}
+                    className="text-neutral-500"
+                    onClick={() => setIsFilterOpen(true)}
+                  >
+                    <Plus />
+                    Add filter
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Button
+                  variant={"ghost"}
+                  size={"sm"}
+                  className="text-neutral-500"
+                  onClick={() => {
+                    clearFilters();
+                    clearSortConditions();
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
 
         <DataTable<User, any> columns={columns} data={data} />
       </div>

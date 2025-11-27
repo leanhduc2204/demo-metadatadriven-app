@@ -37,16 +37,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
-interface FieldConfig {
-  label: string;
-  icon: IconComponent;
-}
-
-type IconComponent = typeof ChevronRight;
+import { FieldConfigItem } from "@/lib/field-config";
 
 interface OptionsPopoverProps {
-  fieldConfig: Record<string, FieldConfig>;
+  fieldConfig: Record<string, FieldConfigItem>;
   visibleFields: string[];
   onHideField: (field: string) => void;
   onShowField: (field: string) => void;
@@ -55,7 +49,7 @@ interface OptionsPopoverProps {
 
 interface SortableItemProps {
   id: string;
-  config: FieldConfig;
+  config: FieldConfigItem;
   onHideField: (field: string) => void;
 }
 
@@ -191,7 +185,7 @@ function MainMenu({ visibleFieldsCount, onOpenFields }: MainMenuProps) {
 }
 
 interface HiddenFieldsViewProps {
-  fieldConfig: Record<string, FieldConfig>;
+  fieldConfig: Record<string, FieldConfigItem>;
   visibleFields: string[];
   onShowField: (field: string) => void;
   onBack: () => void;
@@ -254,7 +248,7 @@ function HiddenFieldsView({
 }
 
 interface FieldsViewProps {
-  fieldConfig: Record<string, FieldConfig>;
+  fieldConfig: Record<string, FieldConfigItem>;
   visibleFields: string[];
   onHideField: (field: string) => void;
   onReorderFields: (fields: string[]) => void;
@@ -388,7 +382,7 @@ export function OptionsPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant={"ghost"} size={"sm"} className="text-neutral-500">
+        <Button variant={"ghost"} size={"sm"} className="text-neutral-500 px-2">
           Options
         </Button>
       </PopoverTrigger>
