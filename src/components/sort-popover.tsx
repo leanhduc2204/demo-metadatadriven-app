@@ -32,11 +32,18 @@ export function SortPopover({
   const [open, setOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>(SortBy.ASC);
 
-  const { addSortCondition, sortConditions } = useSortStore();
+  const { addSortCondition, updateSortCondition, sortConditions } =
+    useSortStore();
 
   const handleFieldClick = (field: string) => {
     if (sortConditions.find((sc) => sc.field === field)) {
       // Already sorted, do nothing or toggle? Original did nothing
+      updateSortCondition(
+        sortConditions.find((sc) => sc.field === field)?.id || "",
+        {
+          sortBy: sortBy,
+        }
+      );
     } else {
       addSortCondition({
         id: field,
