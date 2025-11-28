@@ -34,7 +34,7 @@ const createUsers = (numUser: number) => {
   return users;
 };
 
-export const data: User[] = [...createUsers(10)];
+export const data: User[] = [...createUsers(25)];
 
 // Opportunities data schema
 

@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/popover";
 
 import { FilterCondition } from "@/types/common";
-import { X } from "lucide-react";
+import { Funnel, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterItemPopover } from "./filter-item-popover";
 import { useFilterStore } from "@/stores/use-filter-store";
@@ -32,9 +32,9 @@ export function FilterItemBadge({ filter, icon, label }: FilterItemBadgeProps) {
           )}
         >
           <div className="flex items-center gap-1">
-            {icon}
+            {filter.id !== "Search any field" ? icon : <Funnel />}
             <span className="font-medium">
-              {label}
+              {filter.id !== "Search any field" ? label : "Any field"}
               {filter.value && `: ${filter.value}`}
             </span>
           </div>

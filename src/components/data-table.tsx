@@ -68,9 +68,9 @@ export function DataTable<TData, TValue>({
     <div
       className="px-2"
       style={{
-        height: "85vh", // Set a fixed height for the container to enable virtual scrolling
+        height: "85vh",
         width: "100%",
-        overflow: "auto", // Enable both X and Y scrolling
+        overflow: "auto",
         position: "relative",
       }}
       ref={tableContainerRef}
@@ -80,9 +80,9 @@ export function DataTable<TData, TValue>({
           width: `${totalTableWidth}px`,
           tableLayout: "fixed",
         }}
-        className="w-full caption-bottom text-sm text-left border-t border-b"
+        className="w-full caption-bottom text-sm text-left border-b"
       >
-        <TableHeader className="sticky top-0 z-20 bg-background shadow-sm">
+        <TableHeader className="sticky top-0 z-20 bg-background shadow-xs">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="flex w-full">
               {headerGroup.headers.map((header) => (

@@ -154,7 +154,7 @@ export default function Home() {
             </div>
           </>
         )}
-
+        <Separator />
         <DataTable<User, any> columns={columns} data={data} />
       </div>
     </div>

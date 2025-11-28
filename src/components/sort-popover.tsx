@@ -79,7 +79,7 @@ export function SortPopover({
         <Separator />
         <SortFieldSearch value={sortFields} onChange={onSortFieldsChange} />
         <Separator />
-        <div className="max-h-[300px] overflow-y-auto">
+        <div>
           <SortFieldList
             fieldConfig={fieldConfig}
             visibleFields={visibleFields}

@@ -89,7 +89,7 @@ export function useUserColumns({
 
     const addColumnColumn: ColumnDef<User> = {
       id: "add-column",
-      size: 700,
+      size: 1000,
       header: () => (
         <AddColumnHeader
           visibleFields={visibleFields}
