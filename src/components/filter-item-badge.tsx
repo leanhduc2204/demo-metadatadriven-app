@@ -5,7 +5,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { FilterCondition } from "@/types/common";
+import { FilterCondition, FilterOperator } from "@/types/common";
 import { Funnel, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterItemPopover } from "./filter-item-popover";
@@ -21,6 +21,10 @@ interface FilterItemBadgeProps {
 export function FilterItemBadge({ filter, icon, label }: FilterItemBadgeProps) {
   const { updateFilter, removeFilter } = useFilterStore();
   const [open, setOpen] = useState(false);
+  const isEmpty =
+    filter.operator === FilterOperator.IS_EMPTY ||
+    filter.operator === FilterOperator.IS_NOT_EMPTY;
+  const isAnyField = filter.id === "Search any field";
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -32,10 +36,16 @@ export function FilterItemBadge({ filter, icon, label }: FilterItemBadgeProps) {
           )}
         >
           <div className="flex items-center gap-1">
-            {filter.id !== "Search any field" ? icon : <Funnel />}
+            {isAnyField ? <Funnel /> : icon}
             <span className="font-medium">
-              {filter.id !== "Search any field" ? label : "Any field"}
-              {filter.value && `: ${filter.value}`}
+              {isAnyField ? "Any field" : label}
+              {filter.value
+                ? `: ${filter.value}`
+                : isEmpty
+                ? filter.operator === FilterOperator.IS_EMPTY
+                  ? ": Empty"
+                  : ": NotEmpty"
+                : ""}
             </span>
           </div>
           <Button

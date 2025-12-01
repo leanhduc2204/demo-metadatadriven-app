@@ -69,14 +69,19 @@ export function FilterItem({
           <Separator />
         </>
       )}
-      <div>
-        <Input
-          placeholder={label}
-          value={filterValue}
-          onChange={(e) => onFilterValueChange(e.target.value)}
-          className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-xs placeholder:text-neutral-400 text-xs"
-        />
-      </div>
+      {!(
+        selectedOperator === FilterOperator.IS_EMPTY ||
+        selectedOperator === FilterOperator.IS_NOT_EMPTY
+      ) && (
+        <div>
+          <Input
+            placeholder={label}
+            value={filterValue}
+            onChange={(e) => onFilterValueChange(e.target.value)}
+            className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-xs placeholder:text-neutral-400 text-xs"
+          />
+        </div>
+      )}
     </>
   );
 }

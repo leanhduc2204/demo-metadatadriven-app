@@ -15,6 +15,7 @@ import { data, User } from "@/lib/data";
 import { fieldConfig } from "@/lib/field-config";
 import { useFilterStore } from "@/stores/use-filter-store";
 import { useSortStore } from "@/stores/use-sort-store";
+import { FilterOperator } from "@/types/common";
 import { Plus, User as UserIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -37,12 +38,7 @@ export default function Home() {
   const columns = useUserColumns({ visibleFields, setVisibleFields });
 
   return (
-    <div className="w-full h-full bg-gray-100 p-4 flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <UserIcon size={16} className="text-neutral-900" />
-        <p className="text-sm font-medium text-neutral-900">People</p>
-      </div>
-
+    <div className="flex flex-col gap-4">
       <div className="bg-white w-full border rounded-md flex flex-col py-2">
         <div className="flex items-center justify-between px-2 mb-2">
           <div>
@@ -89,7 +85,17 @@ export default function Home() {
         </div>
 
         {((filters.length > 0 &&
-          filters.some((filter) => filter.value !== "")) ||
+          (filters.some(
+            (filter) =>
+              filter.value !== "" &&
+              filter.operator !== FilterOperator.IS_EMPTY &&
+              filter.operator !== FilterOperator.IS_NOT_EMPTY
+          ) ||
+            filters.some(
+              (filter) =>
+                filter.operator === FilterOperator.IS_EMPTY ||
+                filter.operator === FilterOperator.IS_NOT_EMPTY
+            ))) ||
           sortConditions.length > 0) && (
           <>
             <Separator />
