@@ -21,8 +21,8 @@ import {
 import { useFilterStore } from "@/stores/use-filter-store";
 import { useSortStore } from "@/stores/use-sort-store";
 import { FilterOperator } from "@/types/common";
-import { Kanban, Plus, User as UserIcon } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Kanban, ListIcon, Plus, User as UserIcon } from "lucide-react";
+import { useState, useMemo, ReactNode } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 export default function OpportunitiesPage() {
@@ -38,6 +38,7 @@ export default function OpportunitiesPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewLayout, setViewLayout] = useState<ViewLayout>("table");
   const [currentView, setCurrentView] = useState<"all" | "by-stage">("all");
+  const [currentIcon, setCurrentIcon] = useState<ReactNode>(<ListIcon />);
 
   const { filters, clearFilters } = useFilterStore();
   const { sortConditions, clearSortConditions } = useSortStore();
@@ -99,13 +100,16 @@ export default function OpportunitiesPage() {
               onDefaultViewClick={() => {
                 setCurrentView("all");
                 setViewLayout("table");
+                setCurrentIcon(<ListIcon />);
               }}
+              currentIcon={currentIcon}
             >
               <DropdownMenuItem
                 className="text-neutral-500 w-full justify-between"
                 onClick={() => {
                   setCurrentView("by-stage");
-                  setViewLayout("table"); // Default to kanban when switching to by-stage
+                  setViewLayout("table");
+                  setCurrentIcon(<Kanban />);
                 }}
               >
                 <div className="flex flex-1 items-center gap-2">

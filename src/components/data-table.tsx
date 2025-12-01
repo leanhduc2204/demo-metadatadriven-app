@@ -122,7 +122,7 @@ export function DataTable<TData, TValue>({
             return (
               <TableRow
                 key={virtualItem.key}
-                className="absolute top-0 left-0 flex w-full items-center group"
+                className="absolute top-0 left-0 flex w-full group"
                 style={{
                   height: `${virtualItem.size}px`,
                   transform: `translateY(${virtualItem.start}px)`,

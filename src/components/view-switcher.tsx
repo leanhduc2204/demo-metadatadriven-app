@@ -18,6 +18,7 @@ interface ViewSwitcherProps {
   children?: ReactNode;
   currentView?: string;
   onDefaultViewClick?: () => void;
+  currentIcon?: ReactNode;
 }
 
 export function ViewSwitcher({
@@ -25,6 +26,7 @@ export function ViewSwitcher({
   tableName,
   children,
   currentView,
+  currentIcon,
   onDefaultViewClick,
 }: ViewSwitcherProps) {
   return (
@@ -35,7 +37,7 @@ export function ViewSwitcher({
           size={"sm"}
           className="text-neutral-600 text-sm gap-2"
         >
-          <ListIcon />
+          {currentIcon || <ListIcon />}
           <span>
             {currentView || `All ${tableName}`}
             <span className="text-neutral-400 ml-1">• {itemCount}</span>

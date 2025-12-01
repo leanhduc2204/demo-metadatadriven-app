@@ -13,7 +13,7 @@ export function DefaultCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
           ? "border-r"
           : "",
         isPinned
-          ? "sticky z-10 bg-background group-hover:bg-muted group-data-[state=selected]:bg-muted shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r-2 border-r-border"
+          ? "sticky z-10 bg-background group-hover:bg-muted group-data-[state=selected]:bg-muted shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r-2 border-r-border border-b border-border"
           : "",
         cell.column.id === "select" ? "border-r-0" : ""
       )}

@@ -1,8 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { DataTable } from "@/components/data-table";
+import { Badge } from "./ui/badge";
+import { Stage } from "@/lib/data";
 
 interface GroupedDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -10,6 +12,14 @@ interface GroupedDataTableProps<TData, TValue> {
   groupBy: keyof TData;
   pinnedColumns?: string[];
 }
+
+const stageColorMap: Record<string, string> = {
+  [Stage.NEW]: "bg-blue-100 text-blue-700 hover:bg-blue-100",
+  [Stage.SCREENING]: "bg-purple-100 text-purple-700 hover:bg-purple-100",
+  [Stage.MEETING]: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
+  [Stage.PROPOSAL]: "bg-orange-100 text-orange-700 hover:bg-orange-100",
+  [Stage.CUSTOMER]: "bg-green-100 text-green-700 hover:bg-green-100",
+};
 
 export function GroupedDataTable<TData, TValue>({
   columns,
@@ -43,7 +53,7 @@ export function GroupedDataTable<TData, TValue>({
   const rowHeight = 35;
 
   return (
-    <div className="flex flex-col w-full overflow-x-auto border rounded-md bg-white">
+    <div className="flex flex-col w-full overflow-x-auto border bg-white">
       <div className="min-w-full w-max">
         <DataTable
           columns={columns}
@@ -60,32 +70,40 @@ export function GroupedDataTable<TData, TValue>({
           const displayData = groupData.slice(0, currentVisibleRows);
           const hasMore = groupData.length > currentVisibleRows;
 
-          // Calculate height including the Load More button row if it exists
+          // Calculate height of content only
           const contentHeight = displayData.length * rowHeight;
-          const loadMoreHeight = hasMore ? 36 : 0; // Height of the load more button row
-          const totalHeight = contentHeight + loadMoreHeight;
 
           return (
             <div key={String(group)} className="flex flex-col">
-              <div className="flex items-center px-4 py-2 bg-neutral-50 border-y sticky left-0 z-10 w-full">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-0 h-6 w-6 mr-2 hover:bg-transparent"
-                  onClick={() => toggleGroup(String(group))}
-                >
-                  {isExpanded ? (
-                    <ChevronDown size={16} className="text-neutral-500" />
-                  ) : (
-                    <ChevronRight size={16} className="text-neutral-500" />
-                  )}
-                </Button>
-                <span className="font-medium text-sm text-neutral-700">
-                  {String(group)}
-                </span>
-                <span className="ml-2 text-xs text-neutral-400">
-                  {groupData.length}
-                </span>
+              <div className="flex w-full bg-white border-y">
+                <div className="sticky left-0 z-20 flex items-center px-4 py-2 bg-white w-fit">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="p-0 h-6 w-6 mr-2 hover:bg-transparent"
+                    onClick={() => toggleGroup(String(group))}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown size={16} className="text-neutral-500" />
+                    ) : (
+                      <ChevronRight size={16} className="text-neutral-500" />
+                    )}
+                  </Button>
+                  <Badge
+                    variant={"secondary"}
+                    className={`${
+                      stageColorMap[String(group)] ||
+                      "bg-neutral-100 text-neutral-700"
+                    } rounded-md px-2 py-0.5`}
+                  >
+                    <span className="font-medium text-sm text-nowrap">
+                      {String(group)}
+                    </span>
+                  </Badge>
+                  <span className="ml-2 text-xs text-neutral-400">
+                    {groupData.length}
+                  </span>
+                </div>
               </div>
 
               {isExpanded && (
@@ -94,24 +112,25 @@ export function GroupedDataTable<TData, TValue>({
                     columns={columns}
                     data={displayData}
                     hideHeader={true}
-                    height={totalHeight}
+                    height={contentHeight}
                     overflow="visible"
                     pinnedColumns={pinnedColumns}
-                  >
-                    {hasMore && (
-                      <div className="w-full bg-white sticky left-0">
+                  />
+                  {hasMore && (
+                    <div className="w-full bg-white border-t">
+                      <div className="sticky left-0 z-10 w-fit bg-white">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => loadMore(String(group))}
-                          className="w-full h-9 justify-start pl-9 font-normal text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 rounded-none"
+                          className="w-max h-9 justify-start pl-9 font-normal text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 rounded-none"
                         >
-                          <ChevronDown size={16} className="mr-4" />
+                          <ArrowDown size={16} className="mr-4" />
                           Load more
                         </Button>
                       </div>
-                    )}
-                  </DataTable>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
