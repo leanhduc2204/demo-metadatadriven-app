@@ -26,6 +26,7 @@ interface FieldsViewProps {
   onReorderFields: (fields: string[]) => void;
   onBack: () => void;
   onOpenHiddenFields: () => void;
+  lockedColumns: string[];
 }
 
 export function FieldsView({
@@ -35,6 +36,7 @@ export function FieldsView({
   onReorderFields,
   onBack,
   onOpenHiddenFields,
+  lockedColumns,
 }: FieldsViewProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -79,7 +81,7 @@ export function FieldsView({
                 id={field}
                 config={fieldConfig[field]}
                 onHideField={onHideField}
-                isLocked={field === "fullName"}
+                isLocked={lockedColumns.includes(field)}
               />
             ))}
           </SortableContext>

@@ -3,10 +3,15 @@ import {
   BriefcaseBusiness,
   Building,
   Calendar1,
+  CalendarClock,
+  CircleDollarSign,
+  Clock,
+  Contact,
   History,
   Mail,
   Map,
   Phone,
+  Target,
   User as UserIcon,
   LucideIcon,
 } from "lucide-react";
@@ -26,4 +31,46 @@ export const fieldConfig: Record<string, FieldConfigItem> = {
   creationDate: { label: "Creation date", icon: Calendar1 },
   city: { label: "City", icon: Map },
   jobTitle: { label: "Job Title", icon: BriefcaseBusiness },
+  // Opportunity specific fields
+  name: { label: "Opportunity Name", icon: UserIcon },
+  amount: { label: "Amount", icon: CircleDollarSign },
+  closeDate: { label: "Close Date", icon: CalendarClock },
+  stage: { label: "Stage", icon: Target },
+  pointOfContact: { label: "Point of Contact", icon: Contact },
+  lastUpdate: { label: "Last Update", icon: Clock },
 };
+
+export const peopleFields = [
+  "id",
+  "fullName",
+  "emails",
+  "company",
+  "phones",
+  "createdBy",
+  "creationDate",
+  "city",
+  "jobTitle",
+];
+
+export const opportunityFields = [
+  "id",
+  "name",
+  "amount",
+  "stage",
+  "closeDate",
+  "company",
+  "pointOfContact",
+  "createdBy",
+  "creationDate",
+  "lastUpdate",
+];
+
+export function getFieldConfig(fields: string[]) {
+  const config: Record<string, FieldConfigItem> = {};
+  fields.forEach((field) => {
+    if (fieldConfig[field]) {
+      config[field] = fieldConfig[field];
+    }
+  });
+  return config;
+}

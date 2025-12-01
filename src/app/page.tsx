@@ -12,12 +12,12 @@ import { Separator } from "@/components/ui/separator";
 import { ViewSwitcher } from "@/components/view-switcher";
 import { useUserColumns } from "@/hooks/use-user-columns";
 import { data, User } from "@/lib/data";
-import { fieldConfig } from "@/lib/field-config";
+import { fieldConfig, getFieldConfig, peopleFields } from "@/lib/field-config";
 import { useFilterStore } from "@/stores/use-filter-store";
 import { useSortStore } from "@/stores/use-sort-store";
 import { FilterOperator } from "@/types/common";
 import { Plus, User as UserIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export default function Home() {
   const [visibleFields, setVisibleFields] = useState<string[]>([
@@ -37,18 +37,20 @@ export default function Home() {
 
   const columns = useUserColumns({ visibleFields, setVisibleFields });
 
+  const peopleFieldConfig = useMemo(() => getFieldConfig(peopleFields), []);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-white w-full border rounded-md flex flex-col py-2">
         <div className="flex items-center justify-between px-2 mb-2">
           <div>
-            <ViewSwitcher itemCount={data.length} />
+            <ViewSwitcher itemCount={data.length} tableName="People" />
           </div>
 
           <div className="flex items-center">
             <div>
               <FilterPopover
-                fieldConfig={fieldConfig}
+                fieldConfig={peopleFieldConfig}
                 visibleFields={visibleFields}
                 searchFields={searchFields}
                 onSearchFieldsChange={setSearchFields}
@@ -59,7 +61,7 @@ export default function Home() {
 
             <div>
               <SortPopover
-                fieldConfig={fieldConfig}
+                fieldConfig={peopleFieldConfig}
                 visibleFields={visibleFields}
                 sortFields={sortFields}
                 onSortFieldsChange={setSortFields}
@@ -68,7 +70,7 @@ export default function Home() {
 
             <div>
               <OptionsPopover
-                fieldConfig={fieldConfig}
+                fieldConfig={peopleFieldConfig}
                 visibleFields={visibleFields}
                 onHideField={(field) => {
                   setVisibleFields(visibleFields.filter((f) => f !== field));

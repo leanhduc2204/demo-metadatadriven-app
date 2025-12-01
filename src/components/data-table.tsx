@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -13,7 +13,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { TableBody, TableHeader, TableRow } from "@/components/ui/table";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 import { DefaultCell } from "./default-cell";
 import { DefaultHeader } from "./default-header";
@@ -21,18 +21,35 @@ import { DefaultHeader } from "./default-header";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  hideHeader?: boolean;
+  height?: string | number;
+  children?: React.ReactNode;
+  overflow?: string;
+  pinnedColumns?: string[];
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  hideHeader = false,
+  height = "85vh",
+  children,
+  overflow,
+  pinnedColumns = ["select", "fullName"],
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: ["select", "fullName"],
+    left: pinnedColumns,
     right: [],
   });
   const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setColumnPinning({
+      left: pinnedColumns,
+      right: [],
+    });
+  }, [pinnedColumns]);
 
   const table = useReactTable({
     data: data,
@@ -51,9 +68,11 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const columnSizing = table.getState().columnSizing;
   const totalTableWidth = useMemo(() => {
     return table.getTotalSize();
-  }, [table.getState().columnSizing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnSizing]);
 
   const { rows } = table.getRowModel();
   const rowVirtualizer = useVirtualizer({
@@ -66,11 +85,10 @@ export function DataTable<TData, TValue>({
 
   return (
     <div
-      className="px-2"
       style={{
-        height: "85vh",
+        height: height,
         width: "100%",
-        overflow: "auto",
+        overflow: overflow || "auto",
         position: "relative",
       }}
       ref={tableContainerRef}
@@ -82,18 +100,19 @@ export function DataTable<TData, TValue>({
         }}
         className="w-full caption-bottom text-sm text-left border-b"
       >
-        <TableHeader className="sticky top-0 z-20 bg-background shadow-xs">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="flex w-full">
-              {headerGroup.headers.map((header) => (
-                <DefaultHeader key={header.column.id} header={header} />
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+        {!hideHeader && (
+          <TableHeader className="sticky top-0 z-20 bg-background shadow-xs">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="flex w-full">
+                {headerGroup.headers.map((header) => (
+                  <DefaultHeader key={header.column.id} header={header} />
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+        )}
         <TableBody
           style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
             width: "100%",
             position: "relative",
           }}
@@ -116,6 +135,20 @@ export function DataTable<TData, TValue>({
               </TableRow>
             );
           })}
+          {/* Render children (like Load More button) as the last row */}
+          {children && (
+            <tr
+              style={{
+                transform: `translateY(${rowVirtualizer.getTotalSize()}px)`,
+                position: "absolute",
+                width: "100%",
+              }}
+            >
+              <td colSpan={columns.length} className="p-0">
+                {children}
+              </td>
+            </tr>
+          )}
         </TableBody>
       </table>
     </div>
