@@ -2,28 +2,19 @@
 "use client";
 
 import { DataTable } from "@/components/data-table";
-import { FilterItemBadge } from "@/components/filter-item-badge";
 import { FilterPopover } from "@/components/filter-popover";
+import { FilterSortBar } from "@/components/filter-sort-bar";
 import { GroupedDataTable } from "@/components/grouped-data-table";
 import { OptionsPopover, ViewLayout } from "@/components/options-popover";
-import { SortItemBadge } from "@/components/sort-item-badge";
 import { SortPopover } from "@/components/sort-popover";
-import { Button } from "@/components/ui/button";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { ViewSwitcher } from "@/components/view-switcher";
 import { useOpportunityColumns } from "@/hooks/use-opportunity-columns";
 import { opportunities, Opportunity } from "@/lib/data";
-import {
-  fieldConfig,
-  getFieldConfig,
-  opportunityFields,
-} from "@/lib/field-config";
-import { useFilterStore } from "@/stores/use-filter-store";
-import { useSortStore } from "@/stores/use-sort-store";
-import { FilterOperator } from "@/types/common";
-import { Table2, ListIcon, Plus, User as UserIcon } from "lucide-react";
-import { useState, useMemo, ReactNode } from "react";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { getFieldConfig, opportunityFields } from "@/lib/field-config";
+import { ListIcon, Table2 } from "lucide-react";
+import { ReactNode, useMemo, useState } from "react";
 
 export default function OpportunitiesPage() {
   const [visibleFields, setVisibleFields] = useState<string[]>([
@@ -39,9 +30,6 @@ export default function OpportunitiesPage() {
   const [viewLayout, setViewLayout] = useState<ViewLayout>("table");
   const [currentView, setCurrentView] = useState<"all" | "by-stage">("all");
   const [currentIcon, setCurrentIcon] = useState<ReactNode>(<ListIcon />);
-
-  const { filters, clearFilters } = useFilterStore();
-  const { sortConditions, clearSortConditions } = useSortStore();
 
   const columns = useOpportunityColumns({ visibleFields, setVisibleFields });
 
@@ -166,82 +154,11 @@ export default function OpportunitiesPage() {
           </div>
         </div>
 
-        {((filters.length > 0 &&
-          (filters.some(
-            (filter) =>
-              filter.value !== "" &&
-              filter.operator !== FilterOperator.IS_EMPTY &&
-              filter.operator !== FilterOperator.IS_NOT_EMPTY
-          ) ||
-            filters.some(
-              (filter) =>
-                filter.operator === FilterOperator.IS_EMPTY ||
-                filter.operator === FilterOperator.IS_NOT_EMPTY
-            ))) ||
-          sortConditions.length > 0) && (
-          <>
-            <Separator />
-            <div className="flex items-center justify-between p-2">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  {sortConditions.map((sortCondition) => {
-                    return (
-                      <SortItemBadge
-                        key={sortCondition.id}
-                        sortCondition={sortCondition}
-                        label={
-                          fieldConfig[sortCondition.field]?.label ||
-                          sortCondition.field
-                        }
-                      />
-                    );
-                  })}
-                </div>
+        <FilterSortBar
+          fieldConfig={opportunityFieldConfig}
+          onFilterOpen={() => setIsFilterOpen(true)}
+        />
 
-                {sortConditions.length > 0 && filters.length > 0 && (
-                  <div className="w-[1.5px] h-2 bg-neutral-200" />
-                )}
-
-                <div className="flex items-center gap-2">
-                  {filters.map((filter) => {
-                    const Icon = fieldConfig[filter.field]?.icon || UserIcon;
-                    return (
-                      <FilterItemBadge
-                        key={filter.id}
-                        filter={filter}
-                        icon={<Icon />}
-                        label={fieldConfig[filter.field]?.label || filter.field}
-                      />
-                    );
-                  })}
-                  <Button
-                    variant={"ghost"}
-                    size={"sm"}
-                    className="text-neutral-500"
-                    onClick={() => setIsFilterOpen(true)}
-                  >
-                    <Plus />
-                    Add filter
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <Button
-                  variant={"ghost"}
-                  size={"sm"}
-                  className="text-neutral-500"
-                  onClick={() => {
-                    clearFilters();
-                    clearSortConditions();
-                  }}
-                >
-                  Reset
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
         <Separator />
         {renderContent()}
       </div>

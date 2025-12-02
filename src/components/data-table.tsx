@@ -131,6 +131,7 @@ export function DataTable<TData, TValue>({
           style={{
             width: "100%",
             position: "relative",
+            height: `${rowVirtualizer.getTotalSize()}px`,
           }}
         >
           {!hideBody &&

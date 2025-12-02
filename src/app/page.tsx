@@ -2,22 +2,16 @@
 "use client";
 
 import { DataTable } from "@/components/data-table";
-import { FilterItemBadge } from "@/components/filter-item-badge";
 import { FilterPopover } from "@/components/filter-popover";
+import { FilterSortBar } from "@/components/filter-sort-bar";
 import { OptionsPopover } from "@/components/options-popover";
-import { SortItemBadge } from "@/components/sort-item-badge";
 import { SortPopover } from "@/components/sort-popover";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ViewSwitcher } from "@/components/view-switcher";
 import { useUserColumns } from "@/hooks/use-user-columns";
 import { data, User } from "@/lib/data";
-import { fieldConfig, getFieldConfig, peopleFields } from "@/lib/field-config";
-import { useFilterStore } from "@/stores/use-filter-store";
-import { useSortStore } from "@/stores/use-sort-store";
-import { FilterOperator } from "@/types/common";
-import { Plus, User as UserIcon } from "lucide-react";
-import { useState, useMemo } from "react";
+import { getFieldConfig, peopleFields } from "@/lib/field-config";
+import { useMemo, useState } from "react";
 
 export default function Home() {
   const [visibleFields, setVisibleFields] = useState<string[]>([
@@ -31,9 +25,6 @@ export default function Home() {
   const [searchFields, setSearchFields] = useState<string>("");
   const [sortFields, setSortFields] = useState<string>("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  const { filters, clearFilters } = useFilterStore();
-  const { sortConditions, clearSortConditions } = useSortStore();
 
   const columns = useUserColumns({ visibleFields, setVisibleFields });
 
@@ -86,82 +77,11 @@ export default function Home() {
           </div>
         </div>
 
-        {((filters.length > 0 &&
-          (filters.some(
-            (filter) =>
-              filter.value !== "" &&
-              filter.operator !== FilterOperator.IS_EMPTY &&
-              filter.operator !== FilterOperator.IS_NOT_EMPTY
-          ) ||
-            filters.some(
-              (filter) =>
-                filter.operator === FilterOperator.IS_EMPTY ||
-                filter.operator === FilterOperator.IS_NOT_EMPTY
-            ))) ||
-          sortConditions.length > 0) && (
-          <>
-            <Separator />
-            <div className="flex items-center justify-between p-2">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  {sortConditions.map((sortCondition) => {
-                    return (
-                      <SortItemBadge
-                        key={sortCondition.id}
-                        sortCondition={sortCondition}
-                        label={
-                          fieldConfig[sortCondition.field]?.label ||
-                          sortCondition.field
-                        }
-                      />
-                    );
-                  })}
-                </div>
+        <FilterSortBar
+          fieldConfig={peopleFieldConfig}
+          onFilterOpen={() => setIsFilterOpen(true)}
+        />
 
-                {sortConditions.length > 0 && filters.length > 0 && (
-                  <div className="w-[1.5px] h-2 bg-neutral-200" />
-                )}
-
-                <div className="flex items-center gap-2">
-                  {filters.map((filter) => {
-                    const Icon = fieldConfig[filter.field]?.icon || UserIcon;
-                    return (
-                      <FilterItemBadge
-                        key={filter.id}
-                        filter={filter}
-                        icon={<Icon />}
-                        label={fieldConfig[filter.field]?.label || filter.field}
-                      />
-                    );
-                  })}
-                  <Button
-                    variant={"ghost"}
-                    size={"sm"}
-                    className="text-neutral-500"
-                    onClick={() => setIsFilterOpen(true)}
-                  >
-                    <Plus />
-                    Add filter
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <Button
-                  variant={"ghost"}
-                  size={"sm"}
-                  className="text-neutral-500"
-                  onClick={() => {
-                    clearFilters();
-                    clearSortConditions();
-                  }}
-                >
-                  Reset
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
         <Separator />
         <DataTable<User, any> columns={columns} data={data} />
       </div>
