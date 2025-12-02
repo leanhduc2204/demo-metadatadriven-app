@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Opportunity } from "@/lib/data";
 import { Checkbox } from "@/components/ui/checkbox";
-import { fieldConfig } from "@/lib/field-config";
+import { fieldConfig, opportunityFields } from "@/lib/field-config";
 import { AddColumnHeader } from "@/components/add-column-header";
 import { useMemo } from "react";
 import { User as UserIcon } from "lucide-react";
@@ -88,6 +88,7 @@ export function useOpportunityColumns({
         <AddColumnHeader
           visibleFields={visibleFields}
           setVisibleFields={setVisibleFields}
+          allowedFields={opportunityFields}
         />
       ),
       cell: () => null,

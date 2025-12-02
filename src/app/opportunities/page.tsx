@@ -21,7 +21,7 @@ import {
 import { useFilterStore } from "@/stores/use-filter-store";
 import { useSortStore } from "@/stores/use-sort-store";
 import { FilterOperator } from "@/types/common";
-import { Kanban, ListIcon, Plus, User as UserIcon } from "lucide-react";
+import { Table2, ListIcon, Plus, User as UserIcon } from "lucide-react";
 import { useState, useMemo, ReactNode } from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
@@ -59,6 +59,7 @@ export default function OpportunitiesPage() {
             data={opportunities}
             groupBy="stage"
             pinnedColumns={["select", "name"]}
+            getRowId={(row) => String(row.id)}
           />
         );
       }
@@ -84,6 +85,7 @@ export default function OpportunitiesPage() {
         columns={columns}
         data={opportunities}
         pinnedColumns={["select", "name"]}
+        getRowId={(row) => String(row.id)}
       />
     );
   };
@@ -109,11 +111,11 @@ export default function OpportunitiesPage() {
                 onClick={() => {
                   setCurrentView("by-stage");
                   setViewLayout("table");
-                  setCurrentIcon(<Kanban />);
+                  setCurrentIcon(<Table2 />);
                 }}
               >
                 <div className="flex flex-1 items-center gap-2">
-                  <Kanban />
+                  <Table2 />
                   By Stage
                 </div>
               </DropdownMenuItem>

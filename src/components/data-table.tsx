@@ -7,6 +7,8 @@ import {
   RowSelectionState,
   useReactTable,
   ColumnPinningState,
+  OnChangeFn,
+  Row,
 } from "@tanstack/react-table";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -22,34 +24,47 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   hideHeader?: boolean;
+  hideBody?: boolean;
   height?: string | number;
   children?: React.ReactNode;
   overflow?: string;
   pinnedColumns?: string[];
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  getRowId?: (originalRow: TData, index: number, parent?: Row<TData>) => string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   hideHeader = false,
+  hideBody = false,
   height = "85vh",
   children,
   overflow,
   pinnedColumns = ["select", "fullName"],
+  rowSelection: controlledRowSelection,
+  onRowSelectionChange: setControlledRowSelection,
+  getRowId,
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [internalRowSelection, setInternalRowSelection] =
+    useState<RowSelectionState>({});
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
     left: pinnedColumns,
     right: [],
   });
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
+  const rowSelection = controlledRowSelection ?? internalRowSelection;
+  const setRowSelection = setControlledRowSelection ?? setInternalRowSelection;
+
   useEffect(() => {
     setColumnPinning({
       left: pinnedColumns,
       right: [],
     });
-  }, [pinnedColumns]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(pinnedColumns)]);
 
   const table = useReactTable({
     data: data,
@@ -62,6 +77,7 @@ export function DataTable<TData, TValue>({
     enableColumnPinning: true,
     onRowSelectionChange: setRowSelection,
     onColumnPinningChange: setColumnPinning,
+    getRowId,
     state: {
       rowSelection,
       columnPinning,
@@ -117,24 +133,25 @@ export function DataTable<TData, TValue>({
             position: "relative",
           }}
         >
-          {virtualRows.map((virtualItem) => {
-            const row = rows[virtualItem.index];
-            return (
-              <TableRow
-                key={virtualItem.key}
-                className="absolute top-0 left-0 flex w-full group"
-                style={{
-                  height: `${virtualItem.size}px`,
-                  transform: `translateY(${virtualItem.start}px)`,
-                }}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <DefaultCell key={cell.id} cell={cell} />
-                ))}
-              </TableRow>
-            );
-          })}
+          {!hideBody &&
+            virtualRows.map((virtualItem) => {
+              const row = rows[virtualItem.index];
+              return (
+                <TableRow
+                  key={virtualItem.key}
+                  className="absolute top-0 left-0 flex w-full group"
+                  style={{
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <DefaultCell key={cell.id} cell={cell} />
+                  ))}
+                </TableRow>
+              );
+            })}
           {/* Render children (like Load More button) as the last row */}
           {children && (
             <tr

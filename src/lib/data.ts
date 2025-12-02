@@ -19,7 +19,7 @@ const createUsers = (numUser: number) => {
   const users: User[] = [];
   for (let i = 0; i < numUser; i++) {
     users.push({
-      id: faker.number.int({ min: 1, max: 50 }),
+      id: i + 1,
       fullName: faker.person.fullName(),
       emails: [faker.internet.email()],
       company: faker.company.name(),
@@ -64,7 +64,7 @@ const createOpportunities = (numOpportunity: number) => {
   const opportunities: Opportunity[] = [];
   for (let i = 0; i < numOpportunity; i++) {
     opportunities.push({
-      id: faker.number.int({ min: 1, max: 50 }),
+      id: i + 1,
       name: faker.company.name(),
       amount: faker.number.int({ min: 1000, max: 100000 }),
       createdBy: faker.person.fullName(),

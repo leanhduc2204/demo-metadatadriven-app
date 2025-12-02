@@ -3,7 +3,7 @@ import { User } from "@/lib/data";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User as UserIcon } from "lucide-react";
-import { fieldConfig } from "@/lib/field-config";
+import { fieldConfig, peopleFields } from "@/lib/field-config";
 import { AddColumnHeader } from "@/components/add-column-header";
 import { useMemo } from "react";
 
@@ -94,6 +94,7 @@ export function useUserColumns({
         <AddColumnHeader
           visibleFields={visibleFields}
           setVisibleFields={setVisibleFields}
+          allowedFields={peopleFields}
         />
       ),
       cell: () => null,

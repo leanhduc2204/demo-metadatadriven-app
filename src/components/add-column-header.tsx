@@ -12,12 +12,21 @@ import { fieldConfig } from "@/lib/field-config";
 interface AddColumnHeaderProps {
   visibleFields: string[];
   setVisibleFields: (fields: string[]) => void;
+  allowedFields?: string[];
 }
 
 export function AddColumnHeader({
   visibleFields,
   setVisibleFields,
+  allowedFields,
 }: AddColumnHeaderProps) {
+  const fieldsToRender = allowedFields || Object.keys(fieldConfig);
+
+  const availableFields = fieldsToRender.filter(
+    (field) =>
+      !visibleFields.includes(field) && field !== "id" && fieldConfig[field]
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -27,26 +36,22 @@ export function AddColumnHeader({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
-          {Object.keys(fieldConfig)
-            .filter((field) => !visibleFields.includes(field) && field !== "id")
-            .map((field) => {
-              const config = fieldConfig[field];
-              const Icon = config?.icon || UserIcon;
-              return (
-                <DropdownMenuItem
-                  key={field}
-                  onClick={() => {
-                    setVisibleFields([...visibleFields, field]);
-                  }}
-                >
-                  <Icon />
-                  <span>{config?.label || field}</span>
-                </DropdownMenuItem>
-              );
-            })}
-          {Object.keys(fieldConfig).filter(
-            (field) => !visibleFields.includes(field) && field !== "id"
-          ).length === 0 && (
+          {availableFields.map((field) => {
+            const config = fieldConfig[field];
+            const Icon = config?.icon || UserIcon;
+            return (
+              <DropdownMenuItem
+                key={field}
+                onClick={() => {
+                  setVisibleFields([...visibleFields, field]);
+                }}
+              >
+                <Icon />
+                <span>{config?.label || field}</span>
+              </DropdownMenuItem>
+            );
+          })}
+          {availableFields.length === 0 && (
             <DropdownMenuItem disabled>
               <span className="text-neutral-400">
                 No hidden fields available
