@@ -5,6 +5,7 @@ import { DataTable } from "@/components/data-table";
 import { FilterPopover } from "@/components/filter-popover";
 import { FilterSortBar } from "@/components/filter-sort-bar";
 import { GroupedDataTable } from "@/components/grouped-data-table";
+import { EventCalendar } from "@/components/event-calendar";
 import {
   GroupedOptionsPopover,
   ViewLayout,
@@ -76,11 +77,7 @@ export default function OpportunitiesPage() {
         );
       }
       if (viewLayout === "calendar") {
-        return (
-          <div className="p-4 text-center text-neutral-500">
-            Calendar View (Coming Soon)
-          </div>
-        );
+        return <EventCalendar opportunities={opportunities} />;
       }
     }
 
