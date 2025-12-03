@@ -22,3 +22,9 @@ export interface SortCondition {
   field: string;
   sortBy: SortBy;
 }
+
+export enum SortOrder {
+  MANUAL = "manual",
+  ALPHABETICAL = "alphabetical",
+  REVERSE_ALPHABETICAL = "reverse_alphabetical",
+}

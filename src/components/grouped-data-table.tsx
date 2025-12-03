@@ -29,6 +29,7 @@ interface GroupedDataTableProps<TData, TValue> {
   getRowId?: (originalRow: TData, index: number, parent?: Row<TData>) => string;
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  groups?: string[];
 }
 
 const stageColorMap: Record<string, string> = {
@@ -47,6 +48,7 @@ export function GroupedDataTable<TData, TValue>({
   getRowId,
   rowSelection: controlledRowSelection,
   onRowSelectionChange: setControlledRowSelection,
+  groups,
 }: GroupedDataTableProps<TData, TValue>) {
   // --- State Management ---
   const [internalRowSelection, setInternalRowSelection] =
@@ -99,16 +101,16 @@ export function GroupedDataTable<TData, TValue>({
   const tableRows = table.getRowModel().rows;
 
   const groupedData = useMemo(() => {
-    const groups: Record<string, Row<TData>[]> = {};
+    const groupsMap: Record<string, Row<TData>[]> = {};
 
     tableRows.forEach((row) => {
       const groupVal = String(row.getValue(groupBy));
-      if (!groups[groupVal]) {
-        groups[groupVal] = [];
+      if (!groupsMap[groupVal]) {
+        groupsMap[groupVal] = [];
       }
-      groups[groupVal].push(row);
+      groupsMap[groupVal].push(row);
     });
-    return groups;
+    return groupsMap;
   }, [tableRows, groupBy]);
 
   // Initialize expanded/visible state for new groups
@@ -143,8 +145,12 @@ export function GroupedDataTable<TData, TValue>({
 
   const totalTableWidth = table.getTotalSize();
 
-  // Order groups based on Stage enum if possible, otherwise maintain discovery order
+  // Order groups based on props OR default logic
   const orderedGroups = useMemo(() => {
+    if (groups) {
+      return groups;
+    }
+
     const groupKeys = Object.keys(groupedData);
     const stageOrder = [
       Stage.NEW,
@@ -162,7 +168,7 @@ export function GroupedDataTable<TData, TValue>({
       if (idxB !== -1) return 1;
       return a.localeCompare(b);
     });
-  }, [groupedData]);
+  }, [groupedData, groups]);
 
   return (
     <div
@@ -189,7 +195,11 @@ export function GroupedDataTable<TData, TValue>({
 
         <TableBody className="relative w-full">
           {orderedGroups.map((groupName) => {
-            const rowsInGroup = groupedData[groupName];
+            const rowsInGroup = groupedData[groupName] || [];
+
+            // If rowsInGroup is empty (e.g. hidden by filter but group is visible), we might want to show empty group or skip.
+            // Currently we render it.
+
             const isExpanded = expandedGroups[groupName];
             const limit = visibleRows[groupName] || 8;
             const visibleGroupRows = rowsInGroup.slice(0, limit);

@@ -5,16 +5,21 @@ import { DataTable } from "@/components/data-table";
 import { FilterPopover } from "@/components/filter-popover";
 import { FilterSortBar } from "@/components/filter-sort-bar";
 import { GroupedDataTable } from "@/components/grouped-data-table";
-import { OptionsPopover, ViewLayout } from "@/components/options-popover";
+import {
+  GroupedOptionsPopover,
+  ViewLayout,
+} from "@/components/grouped-options-popover";
+import { OptionsPopover } from "@/components/options-popover";
 import { SortPopover } from "@/components/sort-popover";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { ViewSwitcher } from "@/components/view-switcher";
 import { useOpportunityColumns } from "@/hooks/use-opportunity-columns";
-import { opportunities, Opportunity } from "@/lib/data";
+import { opportunities, Opportunity, Stage } from "@/lib/data";
 import { getFieldConfig, opportunityFields } from "@/lib/field-config";
 import { ListIcon, Table2 } from "lucide-react";
 import { ReactNode, useMemo, useState } from "react";
+import { SortOrder } from "@/types/common";
 
 export default function OpportunitiesPage() {
   const [visibleFields, setVisibleFields] = useState<string[]>([
@@ -31,6 +36,15 @@ export default function OpportunitiesPage() {
   const [currentView, setCurrentView] = useState<"all" | "by-stage">("all");
   const [currentIcon, setCurrentIcon] = useState<ReactNode>(<ListIcon />);
 
+  // Grouping state
+  const [groupBy, setGroupBy] = useState<string>("stage");
+  const [sortByGroup, setSortByGroup] = useState<SortOrder>(SortOrder.MANUAL);
+  const [hideEmptyGroups, setHideEmptyGroups] = useState(false);
+  const [visibleGroups, setVisibleGroups] = useState<string[]>(
+    Object.values(Stage)
+  );
+  const [hiddenGroups, setHiddenGroups] = useState<string[]>([]);
+
   const columns = useOpportunityColumns({ visibleFields, setVisibleFields });
 
   const opportunityFieldConfig = useMemo(
@@ -41,13 +55,16 @@ export default function OpportunitiesPage() {
   const renderContent = () => {
     if (currentView === "by-stage") {
       if (viewLayout === "table") {
+        // Filter visible groups based on hideEmptyGroups logic could be here
+        // For now just pass visibleGroups
         return (
           <GroupedDataTable<Opportunity, any>
             columns={columns}
             data={opportunities}
-            groupBy="stage"
+            groupBy={groupBy}
             pinnedColumns={["select", "name"]}
             getRowId={(row) => String(row.id)}
+            groups={visibleGroups}
           />
         );
       }
@@ -132,24 +149,69 @@ export default function OpportunitiesPage() {
             </div>
 
             <div>
-              <OptionsPopover
-                fieldConfig={opportunityFieldConfig}
-                visibleFields={visibleFields}
-                onHideField={(field) => {
-                  setVisibleFields(visibleFields.filter((f) => f !== field));
-                }}
-                onShowField={(field) => {
-                  setVisibleFields([...visibleFields, field]);
-                }}
-                onReorderFields={(fields) => {
-                  setVisibleFields(fields);
-                }}
-                viewLayout={currentView === "by-stage" ? viewLayout : undefined}
-                onViewLayoutChange={
-                  currentView === "by-stage" ? setViewLayout : undefined
-                }
-                lockedColumns={["name"]}
-              />
+              {currentView === "by-stage" ? (
+                <GroupedOptionsPopover
+                  fieldConfig={opportunityFieldConfig}
+                  visibleFields={visibleFields}
+                  onHideField={(field) => {
+                    setVisibleFields(visibleFields.filter((f) => f !== field));
+                  }}
+                  onShowField={(field) => {
+                    setVisibleFields([...visibleFields, field]);
+                  }}
+                  onReorderFields={(fields) => {
+                    setVisibleFields(fields);
+                  }}
+                  viewLayout={viewLayout}
+                  onViewLayoutChange={setViewLayout}
+                  groupBy={groupBy}
+                  onGroupByChange={setGroupBy}
+                  allowedGroupByFields={["stage"]}
+                  sortBy={sortByGroup}
+                  onSortByChange={(val) => {
+                    setSortByGroup(val);
+                    // Simple sort for now based on string comparison
+                    // In real app, might want to sort based on Stage enum order
+                    const sorted = [...visibleGroups].sort((a, b) => {
+                      if (val === SortOrder.ALPHABETICAL)
+                        return a.localeCompare(b);
+                      if (val === SortOrder.REVERSE_ALPHABETICAL)
+                        return b.localeCompare(a);
+                      return 0;
+                    });
+                    setVisibleGroups(sorted);
+                  }}
+                  hideEmptyGroups={hideEmptyGroups}
+                  onHideEmptyGroupsChange={setHideEmptyGroups}
+                  visibleGroups={visibleGroups}
+                  hiddenGroups={hiddenGroups}
+                  onReorderGroups={setVisibleGroups}
+                  onHideGroup={(group) => {
+                    setVisibleGroups(visibleGroups.filter((g) => g !== group));
+                    setHiddenGroups([...hiddenGroups, group]);
+                  }}
+                  onShowGroup={(group) => {
+                    setHiddenGroups(hiddenGroups.filter((g) => g !== group));
+                    setVisibleGroups([...visibleGroups, group]);
+                  }}
+                  lockedColumns={["name"]}
+                />
+              ) : (
+                <OptionsPopover
+                  fieldConfig={opportunityFieldConfig}
+                  visibleFields={visibleFields}
+                  onHideField={(field) => {
+                    setVisibleFields(visibleFields.filter((f) => f !== field));
+                  }}
+                  onShowField={(field) => {
+                    setVisibleFields([...visibleFields, field]);
+                  }}
+                  onReorderFields={(fields) => {
+                    setVisibleFields(fields);
+                  }}
+                  lockedColumns={["name"]}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -3,34 +3,49 @@ import { Separator } from "@/components/ui/separator";
 import {
   ChevronRight,
   Copy,
-  Grid2x2Plus,
   LayoutList,
-  List,
-  LockKeyhole,
+  StretchHorizontal,
+  Table2,
+  Trash2,
 } from "lucide-react";
 
-interface MainMenuProps {
+interface GroupedMainMenuProps {
   visibleFieldsCount: number;
   onOpenFields: () => void;
+  onOpenLayout: () => void;
+  onOpenGroup: () => void;
+  currentLayoutLabel: string;
+  currentGroupByLabel: string;
 }
 
-export function MainMenu({ visibleFieldsCount, onOpenFields }: MainMenuProps) {
+export function GroupedMainMenu({
+  visibleFieldsCount,
+  onOpenFields,
+  onOpenLayout,
+  onOpenGroup,
+  currentLayoutLabel,
+  currentGroupByLabel,
+}: GroupedMainMenuProps) {
   return (
     <>
       <Button
         variant={"ghost"}
         className="justify-between w-full text-neutral-500"
-        disabled
         size={"sm"}
+        onClick={onOpenLayout}
       >
         <div className="flex flex-1 items-center gap-2">
-          <List />
-          <span>Default View</span>
+          <Table2 />
+          <span>Layout</span>
         </div>
-
-        <LockKeyhole />
+        <div className="flex items-center gap-2 text-neutral-400">
+          <span>{currentLayoutLabel}</span>
+          <ChevronRight />
+        </div>
       </Button>
+
       <Separator />
+
       <Button
         variant={"ghost"}
         className="justify-between w-full text-neutral-500"
@@ -47,6 +62,22 @@ export function MainMenu({ visibleFieldsCount, onOpenFields }: MainMenuProps) {
         </div>
       </Button>
 
+      <Button
+        variant={"ghost"}
+        className="justify-between w-full text-neutral-500"
+        size={"sm"}
+        onClick={onOpenGroup}
+      >
+        <div className="flex flex-1 items-center gap-2">
+          <StretchHorizontal />
+          <span>Group</span>
+        </div>
+        <div className="flex items-center gap-2 text-neutral-400">
+          <span>{currentGroupByLabel}</span>
+          <ChevronRight />
+        </div>
+      </Button>
+
       <Separator />
 
       <Button
@@ -59,14 +90,15 @@ export function MainMenu({ visibleFieldsCount, onOpenFields }: MainMenuProps) {
           <span>Copy link to view</span>
         </div>
       </Button>
+
       <Button
         variant={"ghost"}
         className="justify-between w-full text-neutral-500"
         size={"sm"}
       >
         <div className="flex flex-1 items-center gap-2">
-          <Grid2x2Plus />
-          <span>Create custom view</span>
+          <Trash2 />
+          <span>Delete view</span>
         </div>
       </Button>
     </>

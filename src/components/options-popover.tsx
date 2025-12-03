@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -8,11 +7,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { FieldConfigItem } from "@/lib/field-config";
+import { useState } from "react";
 import { FieldsView } from "./options/fields-view";
 import { HiddenFieldsView } from "./options/hidden-fields-view";
 import { MainMenu } from "./options/main-menu";
-
-export type ViewLayout = "table" | "kanban" | "calendar";
 
 interface OptionsPopoverProps {
   fieldConfig: Record<string, FieldConfigItem>;
@@ -20,8 +18,6 @@ interface OptionsPopoverProps {
   onHideField: (field: string) => void;
   onShowField: (field: string) => void;
   onReorderFields: (fields: string[]) => void;
-  viewLayout?: ViewLayout;
-  onViewLayoutChange?: (layout: ViewLayout) => void;
   lockedColumns?: string[];
 }
 
@@ -31,8 +27,6 @@ export function OptionsPopover({
   onHideField,
   onShowField,
   onReorderFields,
-  viewLayout,
-  onViewLayoutChange,
   lockedColumns = ["fullName"],
 }: OptionsPopoverProps) {
   const [open, setOpen] = useState(false);
@@ -75,8 +69,6 @@ export function OptionsPopover({
       <MainMenu
         visibleFieldsCount={visibleFields.length}
         onOpenFields={() => setShowFields(true)}
-        viewLayout={viewLayout}
-        onViewLayoutChange={onViewLayoutChange}
       />
     );
   };

@@ -1,4 +1,4 @@
-import { FilterOperator, SortBy } from "@/types/common";
+import { FilterOperator, SortBy, SortOrder } from "@/types/common";
 
 export const SORT_BY_OPTIONS = {
   [SortBy.ASC]: "Ascending",
@@ -10,4 +10,10 @@ export const FILTER_OPERATOR_OPTIONS = {
   [FilterOperator.DOES_NOT_CONTAIN]: "Does not contain",
   [FilterOperator.IS_EMPTY]: "Is empty",
   [FilterOperator.IS_NOT_EMPTY]: "Is not empty",
+};
+
+export const SORT_ORDER_OPTIONS = {
+  [SortOrder.MANUAL]: "Manual",
+  [SortOrder.ALPHABETICAL]: "Alphabetical",
+  [SortOrder.REVERSE_ALPHABETICAL]: "Reverse alphabetical",
 };
