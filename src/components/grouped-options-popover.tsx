@@ -14,6 +14,7 @@ import { GroupByView } from "./options/group-by-view";
 import { GroupView } from "./options/group-view";
 import { GroupedMainMenu } from "./options/grouped-main-menu";
 import { HiddenFieldsView } from "./options/hidden-fields-view";
+import { HiddenGroupsView } from "./options/hidden-groups-view";
 import { LayoutView } from "./options/layout-view";
 import { SortView } from "./options/sort-view";
 
@@ -158,7 +159,13 @@ export function GroupedOptionsPopover({
           />
         );
       case "hidden-groups":
-        return <></>;
+        return (
+          <HiddenGroupsView
+            hiddenGroups={hiddenGroups}
+            onShowGroup={onShowGroup}
+            onBack={() => setView("group")}
+          />
+        );
       default:
         return (
           <GroupedMainMenu

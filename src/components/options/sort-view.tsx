@@ -1,15 +1,13 @@
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SortOrder } from "@/types/common";
 import {
   ArrowDownAZ,
   ArrowDownZA,
-  ArrowDownZa,
   Check,
   ChevronLeft,
   Hand,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { SortOrder } from "@/types/common";
-import { SORT_ORDER_OPTIONS } from "@/lib/constants";
 
 interface SortViewProps {
   sortOrder: SortOrder;

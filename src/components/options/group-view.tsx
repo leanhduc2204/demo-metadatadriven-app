@@ -137,7 +137,7 @@ export function GroupView({
 
       <Separator />
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col">
         <div className="bg-neutral-100 px-1 py-0.5">
           <span className="text-[10px] font-light text-neutral-500">
             Visible groups
