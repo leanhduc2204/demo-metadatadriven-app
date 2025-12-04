@@ -5,7 +5,7 @@ import {
   SortOrder,
   ViewLayout,
 } from "@/types/common";
-import { EntityConfig } from "@/lib/entity-config";
+import { EntityConfig, EntityViewPreset } from "@/lib/entity-config";
 import { getFieldConfig } from "@/lib/field-config";
 import { ListIcon } from "lucide-react";
 
@@ -128,6 +128,70 @@ export function useEntityPageState<T>(config: EntityConfig<T>) {
     setCurrentIcon(<ListIcon />);
   }, []);
 
+  const applyViewPreset = useCallback(
+    (presetKey?: string | null) => {
+      if (!presetKey || !config.viewPresets?.[presetKey]) {
+        return false;
+      }
+
+      const preset: EntityViewPreset<T> = config.viewPresets[presetKey];
+      let applied = false;
+
+      if ((preset.view === "all" || !preset.view) && presetKey) {
+        resetToDefaultView();
+        applied = true;
+      }
+
+      if (preset.view === "grouped" && supportsGrouping) {
+        setCurrentView("grouped");
+        setViewLayout(preset.layout ?? ViewLayout.TABLE);
+        setCurrentIcon(<ListIcon />);
+        applied = true;
+
+        if (preset.groupBy && preset.groupBy !== groupBy) {
+          setGroupBy(preset.groupBy);
+          if (config.grouping) {
+            const groups = config.grouping.getGroupValues(preset.groupBy);
+            setVisibleGroups(groups);
+            setHiddenGroups([]);
+          }
+        }
+      } else if (preset.layout) {
+        setViewLayout(preset.layout);
+        applied = true;
+      }
+
+      if (preset.calendarDateField) {
+        setCalendarDateField(String(preset.calendarDateField));
+        applied = true;
+      }
+
+      if (preset.calendarViewType) {
+        setCalendarViewType(preset.calendarViewType);
+        applied = true;
+      }
+
+      if (preset.openIn) {
+        setOpenIn(preset.openIn);
+        applied = true;
+      }
+
+      if (typeof preset.compactView === "boolean") {
+        setCompactView(preset.compactView);
+        applied = true;
+      }
+
+      return applied;
+    },
+    [
+      config.grouping,
+      config.viewPresets,
+      groupBy,
+      resetToDefaultView,
+      supportsGrouping,
+    ]
+  );
+
   const switchToGroupedView = useCallback((icon: ReactNode) => {
     setCurrentView("grouped");
     setViewLayout(ViewLayout.TABLE);
@@ -185,5 +249,6 @@ export function useEntityPageState<T>(config: EntityConfig<T>) {
     switchToGroupedView,
     changeViewLayout,
     openFilter: () => setIsFilterOpen(true),
+    applyViewPreset,
   };
 }

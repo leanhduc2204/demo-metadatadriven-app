@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { FilterPopover } from "@/components/filter-popover";
 import { FilterSortBar } from "@/components/filter-sort-bar";
@@ -28,6 +30,21 @@ export function EntityPage<T extends { id: number }>({
   data,
 }: EntityPageProps<T>) {
   const state = useEntityPageState(config);
+  const { applyViewPreset, resetToDefaultView } = state;
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get("view");
+
+  useEffect(() => {
+    if (!viewParam) {
+      resetToDefaultView();
+      return;
+    }
+
+    const applied = applyViewPreset(viewParam);
+    if (!applied) {
+      resetToDefaultView();
+    }
+  }, [viewParam, applyViewPreset, resetToDefaultView]);
 
   const columns = useEntityColumns({
     config,

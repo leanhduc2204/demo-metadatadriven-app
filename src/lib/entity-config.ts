@@ -1,7 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactNode } from "react";
+import { CalendarViewType, OpenInMode, ViewLayout } from "@/types/common";
 import { Opportunity, Stage, Task, TaskStatus, User } from "./data";
 import { opportunityFields, peopleFields, taskFields } from "./field-config";
+
+export type EntityViewPreset<T> = {
+  view?: "all" | "grouped";
+  layout?: ViewLayout;
+  groupBy?: keyof T & string;
+  calendarDateField?: keyof T;
+  calendarViewType?: CalendarViewType;
+  openIn?: OpenInMode;
+  compactView?: boolean;
+};
 
 export interface EntityConfig<T> {
   name: string; // Display name: "Tasks"
@@ -23,6 +34,9 @@ export interface EntityConfig<T> {
     dateField: keyof T; // Field to use for calendar date
     subtitleField?: keyof T; // Optional field for subtitle/badge info
   };
+
+  // Predefined view presets that can be activated via query params
+  viewPresets?: Record<string, EntityViewPreset<T>>;
 
   // Custom formatters for specific fields
   formatters?: Partial<Record<keyof T, (value: any) => ReactNode>>;
@@ -64,6 +78,14 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
     subtitleField: "stage",
   },
 
+  viewPresets: {
+    stage: {
+      view: "grouped",
+      layout: ViewLayout.TABLE,
+      groupBy: "stage",
+    },
+  },
+
   formatters: {
     amount: formatCurrency,
     closeDate: formatDate,
@@ -95,6 +117,14 @@ export const taskConfig: EntityConfig<Task> = {
   calendar: {
     dateField: "dueDate",
     subtitleField: "status",
+  },
+
+  viewPresets: {
+    status: {
+      view: "grouped",
+      layout: ViewLayout.TABLE,
+      groupBy: "status",
+    },
   },
 
   formatters: {
