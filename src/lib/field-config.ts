@@ -14,6 +14,10 @@ import {
   Target,
   User as UserIcon,
   LucideIcon,
+  FileText,
+  ListTodo,
+  CalendarDays,
+  UserCheck,
 } from "lucide-react";
 
 export interface FieldConfigItem {
@@ -38,6 +42,11 @@ export const fieldConfig: Record<string, FieldConfigItem> = {
   stage: { label: "Stage", icon: Target },
   pointOfContact: { label: "Point of Contact", icon: Contact },
   lastUpdate: { label: "Last Update", icon: Clock },
+  // Task specific fields
+  title: { label: "Title", icon: FileText },
+  status: { label: "Status", icon: ListTodo },
+  dueDate: { label: "Due Date", icon: CalendarDays },
+  assignee: { label: "Assignee", icon: UserCheck },
 };
 
 export const peopleFields = [
@@ -60,6 +69,17 @@ export const opportunityFields = [
   "closeDate",
   "company",
   "pointOfContact",
+  "createdBy",
+  "creationDate",
+  "lastUpdate",
+];
+
+export const taskFields = [
+  "id",
+  "title",
+  "status",
+  "dueDate",
+  "assignee",
   "createdBy",
   "creationDate",
   "lastUpdate",

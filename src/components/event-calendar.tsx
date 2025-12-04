@@ -8,7 +8,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Opportunity } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import {
   addMonths,
@@ -27,11 +26,19 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-interface EventCalendarProps {
-  opportunities: Opportunity[];
+interface EventCalendarProps<T> {
+  data: T[];
+  dateField: keyof T;
+  titleField: keyof T;
+  subtitleField?: keyof T;
 }
 
-export function EventCalendar({ opportunities }: EventCalendarProps) {
+export function EventCalendar<T extends { id: number }>({
+  data,
+  dateField,
+  titleField,
+  subtitleField,
+}: EventCalendarProps<T>) {
   const [date, setDate] = useState<Date>(new Date());
 
   // Generate days for the grid
@@ -70,12 +77,18 @@ export function EventCalendar({ opportunities }: EventCalendarProps) {
 
   // Get events for a specific day
   const getEventsForDay = (day: Date) => {
-    return opportunities.filter((opp) => {
-      // Assuming closeDate is ISO string
-      const oppDate = parseISO(opp.closeDate);
-      return isSameDay(oppDate, day);
+    return data.filter((item) => {
+      const itemDate = item[dateField];
+      if (!itemDate) return false;
+      const parsedDate = parseISO(String(itemDate));
+      return isSameDay(parsedDate, day);
     });
   };
+
+  // Get display values
+  const getTitle = (item: T) => String(item[titleField] || "");
+  const getSubtitle = (item: T) =>
+    subtitleField ? String(item[subtitleField] || "") : "";
 
   return (
     <div className="flex flex-col h-full gap-2">
@@ -189,16 +202,20 @@ export function EventCalendar({ opportunities }: EventCalendarProps) {
 
                   {/* Events List */}
                   <div className="flex flex-col gap-1 overflow-y-auto max-h-[80px]">
-                    {dayEvents.map((event) => (
-                      <Badge
-                        key={event.id}
-                        variant="secondary"
-                        className="text-xs truncate justify-start cursor-pointer px-1 py-0.5 font-normal h-auto"
-                        title={`${event.name} (${event.stage})`}
-                      >
-                        <span className="truncate w-full">{event.name}</span>
-                      </Badge>
-                    ))}
+                    {dayEvents.map((event) => {
+                      const title = getTitle(event);
+                      const subtitle = getSubtitle(event);
+                      return (
+                        <Badge
+                          key={event.id}
+                          variant="secondary"
+                          className="text-xs truncate justify-start cursor-pointer px-1 py-0.5 font-normal h-auto"
+                          title={subtitle ? `${title} (${subtitle})` : title}
+                        >
+                          <span className="truncate w-full">{title}</span>
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
               );
