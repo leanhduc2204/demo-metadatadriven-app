@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { FieldConfigItem } from "@/lib/field-config";
-import { SortOrder } from "@/types/common";
+import { SortOrder, ViewLayout } from "@/types/common";
 import { useState } from "react";
 import { FieldsView } from "./options/fields-view";
 import { GroupByView } from "./options/group-by-view";
@@ -17,8 +17,6 @@ import { HiddenFieldsView } from "./options/hidden-fields-view";
 import { HiddenGroupsView } from "./options/hidden-groups-view";
 import { LayoutView } from "./options/layout-view";
 import { SortView } from "./options/sort-view";
-
-export type ViewLayout = "table" | "kanban" | "calendar";
 
 export interface GroupedOptionsPopoverProps {
   fieldConfig: Record<string, FieldConfigItem>;
@@ -138,6 +136,7 @@ export function GroupedOptionsPopover({
             onOpenGroupBy={() => setView("group-by")}
             onOpenSort={() => setView("sort")}
             fieldConfig={fieldConfig}
+            hiddenGroups={hiddenGroups}
           />
         );
       case "group-by":
@@ -173,6 +172,7 @@ export function GroupedOptionsPopover({
             onOpenFields={() => setView("fields")}
             onOpenLayout={() => setView("layout")}
             onOpenGroup={() => setView("group")}
+            currentLayout={viewLayout}
             currentLayoutLabel={
               viewLayout.charAt(0).toUpperCase() + viewLayout.slice(1)
             }

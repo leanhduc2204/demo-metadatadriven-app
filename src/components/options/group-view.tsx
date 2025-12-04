@@ -42,6 +42,7 @@ interface GroupViewProps {
   onOpenGroupBy: () => void;
   onOpenSort: () => void;
   fieldConfig: Record<string, FieldConfigItem>;
+  hiddenGroups: string[];
 }
 
 export function GroupView({
@@ -57,6 +58,7 @@ export function GroupView({
   onOpenGroupBy,
   onOpenSort,
   fieldConfig,
+  hiddenGroups,
 }: GroupViewProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -164,19 +166,23 @@ export function GroupView({
             </SortableContext>
           </DndContext>
         </div>
-        <Separator />
-        <Button
-          variant={"ghost"}
-          size={"sm"}
-          className="w-full justify-between text-neutral-500"
-          onClick={onOpenHiddenGroups}
-        >
-          <div className="flex flex-1 items-center gap-3">
-            <EyeOff />
-            <span>Hidden Stage</span>
-          </div>
-          <ChevronRight />
-        </Button>
+        {hiddenGroups.length > 0 && (
+          <>
+            <Separator />
+            <Button
+              variant={"ghost"}
+              size={"sm"}
+              className="w-full justify-between text-neutral-500"
+              onClick={onOpenHiddenGroups}
+            >
+              <div className="flex flex-1 items-center gap-3">
+                <EyeOff />
+                <span>Hidden Stage</span>
+              </div>
+              <ChevronRight />
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

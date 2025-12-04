@@ -6,10 +6,7 @@ import { FilterPopover } from "@/components/filter-popover";
 import { FilterSortBar } from "@/components/filter-sort-bar";
 import { GroupedDataTable } from "@/components/grouped-data-table";
 import { EventCalendar } from "@/components/event-calendar";
-import {
-  GroupedOptionsPopover,
-  ViewLayout,
-} from "@/components/grouped-options-popover";
+import { GroupedOptionsPopover } from "@/components/grouped-options-popover";
 import { OptionsPopover } from "@/components/options-popover";
 import { SortPopover } from "@/components/sort-popover";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -18,9 +15,10 @@ import { ViewSwitcher } from "@/components/view-switcher";
 import { useOpportunityColumns } from "@/hooks/use-opportunity-columns";
 import { opportunities, Opportunity, Stage } from "@/lib/data";
 import { getFieldConfig, opportunityFields } from "@/lib/field-config";
-import { ListIcon, Table2 } from "lucide-react";
+import { LayoutIcon } from "@/components/layout-icon";
+import { ListIcon } from "lucide-react";
 import { ReactNode, useMemo, useState } from "react";
-import { SortOrder } from "@/types/common";
+import { SortOrder, ViewLayout } from "@/types/common";
 
 export default function OpportunitiesPage() {
   const [visibleFields, setVisibleFields] = useState<string[]>([
@@ -33,7 +31,7 @@ export default function OpportunitiesPage() {
   const [searchFields, setSearchFields] = useState<string>("");
   const [sortFields, setSortFields] = useState<string>("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [viewLayout, setViewLayout] = useState<ViewLayout>("table");
+  const [viewLayout, setViewLayout] = useState<ViewLayout>(ViewLayout.TABLE);
   const [currentView, setCurrentView] = useState<"all" | "by-stage">("all");
   const [currentIcon, setCurrentIcon] = useState<ReactNode>(<ListIcon />);
 
@@ -55,7 +53,7 @@ export default function OpportunitiesPage() {
 
   const renderContent = () => {
     if (currentView === "by-stage") {
-      if (viewLayout === "table") {
+      if (viewLayout === ViewLayout.TABLE) {
         // Filter visible groups based on hideEmptyGroups logic could be here
         // For now just pass visibleGroups
         return (
@@ -69,14 +67,14 @@ export default function OpportunitiesPage() {
           />
         );
       }
-      if (viewLayout === "kanban") {
+      if (viewLayout === ViewLayout.KANBAN) {
         return (
           <div className="p-4 text-center text-neutral-500">
             Kanban View (Coming Soon)
           </div>
         );
       }
-      if (viewLayout === "calendar") {
+      if (viewLayout === ViewLayout.CALENDAR) {
         return <EventCalendar opportunities={opportunities} />;
       }
     }
@@ -103,7 +101,7 @@ export default function OpportunitiesPage() {
               currentView={currentView === "by-stage" ? "By Stage" : undefined}
               onDefaultViewClick={() => {
                 setCurrentView("all");
-                setViewLayout("table");
+                setViewLayout(ViewLayout.TABLE);
                 setCurrentIcon(<ListIcon />);
               }}
               currentIcon={currentIcon}
@@ -112,12 +110,12 @@ export default function OpportunitiesPage() {
                 className="text-neutral-500 w-full justify-between"
                 onClick={() => {
                   setCurrentView("by-stage");
-                  setViewLayout("table");
-                  setCurrentIcon(<Table2 />);
+                  setViewLayout(ViewLayout.TABLE);
+                  setCurrentIcon(<LayoutIcon layout={ViewLayout.TABLE} />);
                 }}
               >
                 <div className="flex flex-1 items-center gap-2">
-                  <Table2 />
+                  <LayoutIcon layout={viewLayout} />
                   By Stage
                 </div>
               </DropdownMenuItem>
@@ -160,7 +158,10 @@ export default function OpportunitiesPage() {
                     setVisibleFields(fields);
                   }}
                   viewLayout={viewLayout}
-                  onViewLayoutChange={setViewLayout}
+                  onViewLayoutChange={(layout) => {
+                    setViewLayout(layout);
+                    setCurrentIcon(<LayoutIcon layout={layout} />);
+                  }}
                   groupBy={groupBy}
                   onGroupByChange={setGroupBy}
                   allowedGroupByFields={["stage"]}

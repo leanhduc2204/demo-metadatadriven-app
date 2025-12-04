@@ -1,7 +1,8 @@
-import { Calendar1, Check, ChevronLeft, Kanban, Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ViewLayout } from "../grouped-options-popover";
+import { ViewLayout } from "@/types/common";
+import { Check, ChevronLeft } from "lucide-react";
+import { LayoutIcon } from "../layout-icon";
 
 interface LayoutViewProps {
   currentLayout: ViewLayout;
@@ -14,9 +15,21 @@ const layoutOptions: {
   value: ViewLayout;
   icon: React.ReactNode;
 }[] = [
-  { label: "Table", value: "table", icon: <Table2 /> },
-  { label: "Calendar", value: "calendar", icon: <Calendar1 /> },
-  { label: "Kanban", value: "kanban", icon: <Kanban /> },
+  {
+    label: "Table",
+    value: ViewLayout.TABLE,
+    icon: <LayoutIcon layout={ViewLayout.TABLE} />,
+  },
+  {
+    label: "Calendar",
+    value: ViewLayout.CALENDAR,
+    icon: <LayoutIcon layout={ViewLayout.CALENDAR} />,
+  },
+  {
+    label: "Kanban",
+    value: ViewLayout.KANBAN,
+    icon: <LayoutIcon layout={ViewLayout.KANBAN} />,
+  },
 ];
 
 export function LayoutView({

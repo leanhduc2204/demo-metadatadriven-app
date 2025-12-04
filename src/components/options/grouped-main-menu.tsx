@@ -5,15 +5,17 @@ import {
   Copy,
   LayoutList,
   StretchHorizontal,
-  Table2,
   Trash2,
 } from "lucide-react";
+import { LayoutIcon } from "../layout-icon";
+import { ViewLayout } from "@/types/common";
 
 interface GroupedMainMenuProps {
   visibleFieldsCount: number;
   onOpenFields: () => void;
   onOpenLayout: () => void;
   onOpenGroup: () => void;
+  currentLayout: ViewLayout;
   currentLayoutLabel: string;
   currentGroupByLabel: string;
 }
@@ -23,6 +25,7 @@ export function GroupedMainMenu({
   onOpenFields,
   onOpenLayout,
   onOpenGroup,
+  currentLayout,
   currentLayoutLabel,
   currentGroupByLabel,
 }: GroupedMainMenuProps) {
@@ -35,7 +38,7 @@ export function GroupedMainMenu({
         onClick={onOpenLayout}
       >
         <div className="flex flex-1 items-center gap-2">
-          <Table2 />
+          <LayoutIcon layout={currentLayout} />
           <span>Layout</span>
         </div>
         <div className="flex items-center gap-2 text-neutral-400">

@@ -28,3 +28,9 @@ export enum SortOrder {
   ALPHABETICAL = "alphabetical",
   REVERSE_ALPHABETICAL = "reverse_alphabetical",
 }
+
+export enum ViewLayout {
+  TABLE = "table",
+  KANBAN = "kanban",
+  CALENDAR = "calendar",
+}

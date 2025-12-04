@@ -208,7 +208,7 @@ export function GroupedDataTable<TData, TValue>({
             return (
               <React.Fragment key={groupName}>
                 {/* Group Header */}
-                <TableRow className="sticky left-0 z-20 flex items-center w-full bg-neutral-50/80 backdrop-blur-sm border-y px-2 py-2">
+                <TableRow className="sticky left-0 z-20 flex items-center w-full bg-white backdrop-blur-sm border-y px-2 py-2">
                   <td
                     className="w-full border-none p-0"
                     colSpan={columns.length}
@@ -277,7 +277,7 @@ export function GroupedDataTable<TData, TValue>({
                               className="h-8 text-neutral-500 hover:text-neutral-900 font-normal"
                             >
                               <ArrowDown size={14} className="mr-2" />
-                              Load more ({rowsInGroup.length - limit} remaining)
+                              Load more
                             </Button>
                           </div>
                         </td>
