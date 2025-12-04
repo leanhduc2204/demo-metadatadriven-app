@@ -1,4 +1,4 @@
-import { User, Target } from "lucide-react";
+import { User, Target, SquareCheckBig } from "lucide-react";
 
 import {
   Sidebar,
@@ -22,6 +22,11 @@ export const items = [
     title: "Opportunities",
     url: "/opportunities",
     icon: Target,
+  },
+  {
+    title: "Tasks",
+    url: "/tasks",
+    icon: SquareCheckBig,
   },
 ];
 

@@ -83,3 +83,43 @@ const createOpportunities = (numOpportunity: number) => {
 };
 
 export const opportunities: Opportunity[] = [...createOpportunities(50)];
+
+export enum TaskStatus {
+  TODO = "Todo",
+  IN_PROGRESS = "In Progress",
+  DONE = "Done",
+}
+
+export type Task = {
+  id: number;
+  title: string;
+  status: TaskStatus;
+  dueDate: string;
+  assignee: string;
+  createdBy: string;
+  creationDate: string;
+  deletedAt?: string;
+  lastUpdate?: string;
+};
+
+const createTasks = (numTask: number) => {
+  const tasks: Task[] = [];
+  for (let i = 0; i < numTask; i++) {
+    tasks.push({
+      id: i + 1,
+      title: faker.lorem.sentence(),
+      status: faker.helpers.arrayElement(Object.values(TaskStatus)),
+      dueDate: faker.date.future().toISOString(),
+      assignee: faker.person.fullName(),
+      createdBy: faker.person.fullName(),
+      creationDate: faker.date.past().toISOString(),
+      deletedAt: faker.helpers.maybe(() => faker.date.past().toISOString(), {
+        probability: 0.5,
+      }),
+      lastUpdate: faker.date.past().toISOString(),
+    });
+  }
+  return tasks;
+};
+
+export const tasks: Task[] = [...createTasks(50)];
