@@ -7,8 +7,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { FieldConfigItem } from "@/lib/field-config";
-import { SortOrder, ViewLayout } from "@/types/common";
+import {
+  CalendarViewType,
+  OpenInMode,
+  SortOrder,
+  ViewLayout,
+} from "@/types/common";
 import { useState } from "react";
+import { CalendarViewView } from "./options/calendar-view-view";
+import { DateFieldView } from "./options/date-field-view";
 import { FieldsView } from "./options/fields-view";
 import { GroupByView } from "./options/group-by-view";
 import { GroupView } from "./options/group-view";
@@ -16,6 +23,7 @@ import { GroupedMainMenu } from "./options/grouped-main-menu";
 import { HiddenFieldsView } from "./options/hidden-fields-view";
 import { HiddenGroupsView } from "./options/hidden-groups-view";
 import { LayoutView } from "./options/layout-view";
+import { OpenInView } from "./options/open-in-view";
 import { SortView } from "./options/sort-view";
 
 export interface GroupedOptionsPopoverProps {
@@ -45,6 +53,17 @@ export interface GroupedOptionsPopoverProps {
   onShowGroup: (group: string) => void;
 
   lockedColumns?: string[];
+
+  // Calendar specific props
+  calendarDateField?: string;
+  onCalendarDateFieldChange?: (field: string) => void;
+  allowedDateFields?: string[];
+  calendarViewType?: CalendarViewType;
+  onCalendarViewTypeChange?: (viewType: CalendarViewType) => void;
+  openIn?: OpenInMode;
+  onOpenInChange?: (openIn: OpenInMode) => void;
+  compactView?: boolean;
+  onCompactViewChange?: (compact: boolean) => void;
 }
 
 type ViewState =
@@ -55,7 +74,10 @@ type ViewState =
   | "group"
   | "group-by"
   | "sort"
-  | "hidden-groups";
+  | "hidden-groups"
+  | "date-field"
+  | "calendar-view"
+  | "open-in";
 
 export function GroupedOptionsPopover({
   fieldConfig,
@@ -78,9 +100,21 @@ export function GroupedOptionsPopover({
   onHideGroup,
   onShowGroup,
   lockedColumns = ["name"],
+  // Calendar props
+  calendarDateField,
+  onCalendarDateFieldChange,
+  allowedDateFields = [],
+  calendarViewType = CalendarViewType.MONTH,
+  onCalendarViewTypeChange,
+  openIn = OpenInMode.SIDE_PANEL,
+  onOpenInChange,
+  compactView = false,
+  onCompactViewChange,
 }: GroupedOptionsPopoverProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewState>("main");
+
+  const isCalendarLayout = viewLayout === ViewLayout.CALENDAR;
 
   // Reset view when closing
   const handleOpenChange = (isOpen: boolean) => {
@@ -88,6 +122,13 @@ export function GroupedOptionsPopover({
     if (!isOpen) {
       setTimeout(() => setView("main"), 300);
     }
+  };
+
+  // Get calendar view type label
+  const calendarViewTypeLabels: Record<CalendarViewType, string> = {
+    [CalendarViewType.WEEK]: "Week",
+    [CalendarViewType.MONTH]: "Month",
+    [CalendarViewType.TIMELINE]: "Timeline",
   };
 
   const renderContent = () => {
@@ -98,6 +139,18 @@ export function GroupedOptionsPopover({
             currentLayout={viewLayout}
             onLayoutChange={onViewLayoutChange}
             onBack={() => setView("main")}
+            currentDateFieldLabel={
+              calendarDateField
+                ? fieldConfig[calendarDateField]?.label || calendarDateField
+                : undefined
+            }
+            currentCalendarViewType={calendarViewType}
+            currentOpenIn={openIn}
+            compactView={compactView}
+            onOpenDateField={() => setView("date-field")}
+            onOpenCalendarView={() => setView("calendar-view")}
+            onOpenOpenIn={() => setView("open-in")}
+            onCompactViewChange={onCompactViewChange}
           />
         );
       case "fields":
@@ -165,6 +218,42 @@ export function GroupedOptionsPopover({
             onBack={() => setView("group")}
           />
         );
+      // Calendar specific views
+      case "date-field":
+        return (
+          <DateFieldView
+            currentDateField={calendarDateField || ""}
+            onDateFieldChange={(field) => {
+              onCalendarDateFieldChange?.(field);
+              setView("layout");
+            }}
+            allowedDateFields={allowedDateFields}
+            fieldConfig={fieldConfig}
+            onBack={() => setView("layout")}
+          />
+        );
+      case "calendar-view":
+        return (
+          <CalendarViewView
+            currentViewType={calendarViewType}
+            onViewTypeChange={(viewType) => {
+              onCalendarViewTypeChange?.(viewType);
+              setView("layout");
+            }}
+            onBack={() => setView("layout")}
+          />
+        );
+      case "open-in":
+        return (
+          <OpenInView
+            currentOpenIn={openIn}
+            onOpenInChange={(mode) => {
+              onOpenInChange?.(mode);
+              setView("layout");
+            }}
+            onBack={() => setView("layout")}
+          />
+        );
       default:
         return (
           <GroupedMainMenu
@@ -177,6 +266,16 @@ export function GroupedOptionsPopover({
               viewLayout.charAt(0).toUpperCase() + viewLayout.slice(1)
             }
             currentGroupByLabel={fieldConfig[groupBy]?.label || groupBy}
+            // Calendar props
+            isCalendarLayout={isCalendarLayout}
+            currentDateFieldLabel={
+              calendarDateField
+                ? fieldConfig[calendarDateField]?.label || calendarDateField
+                : undefined
+            }
+            currentCalendarViewLabel={calendarViewTypeLabels[calendarViewType]}
+            onOpenDateField={() => setView("date-field")}
+            onOpenCalendarView={() => setView("calendar-view")}
           />
         );
     }

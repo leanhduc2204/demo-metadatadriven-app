@@ -1,5 +1,10 @@
 import { useState, useMemo, useCallback, ReactNode } from "react";
-import { SortOrder, ViewLayout } from "@/types/common";
+import {
+  CalendarViewType,
+  OpenInMode,
+  SortOrder,
+  ViewLayout,
+} from "@/types/common";
 import { EntityConfig } from "@/lib/entity-config";
 import { getFieldConfig } from "@/lib/field-config";
 import { ListIcon } from "lucide-react";
@@ -28,6 +33,16 @@ export function useEntityPageState<T>(config: EntityConfig<T>) {
   const [visibleGroups, setVisibleGroups] = useState<string[]>(defaultGroups);
   const [hiddenGroups, setHiddenGroups] = useState<string[]>([]);
 
+  // Calendar state
+  const [calendarDateField, setCalendarDateField] = useState<string>(
+    config.calendar?.dateField ? String(config.calendar.dateField) : ""
+  );
+  const [calendarViewType, setCalendarViewType] = useState<CalendarViewType>(
+    CalendarViewType.MONTH
+  );
+  const [openIn, setOpenIn] = useState<OpenInMode>(OpenInMode.SIDE_PANEL);
+  const [compactView, setCompactView] = useState(false);
+
   // Memoized values
   const fieldConfigData = useMemo(
     () => getFieldConfig(config.fields),
@@ -40,6 +55,21 @@ export function useEntityPageState<T>(config: EntityConfig<T>) {
       fieldConfigData[config.grouping.defaultGroupBy]?.label || groupBy
     }`;
   }, [config.grouping, fieldConfigData, groupBy]);
+
+  // Get allowed date fields (fields that are date type)
+  const allowedDateFields = useMemo(() => {
+    // Filter fields that have "date" in their name or are explicitly date fields
+    return config.fields.filter((field) => {
+      const lowerField = field.toLowerCase();
+      return (
+        lowerField.includes("date") ||
+        lowerField === "closedate" ||
+        lowerField === "duedate" ||
+        lowerField === "creationdate" ||
+        lowerField === "lastupdate"
+      );
+    });
+  }, [config.fields]);
 
   // Field handlers
   const fieldHandlers = useMemo(
@@ -76,6 +106,17 @@ export function useEntityPageState<T>(config: EntityConfig<T>) {
           })
         );
       },
+    }),
+    []
+  );
+
+  // Calendar handlers
+  const calendarHandlers = useMemo(
+    () => ({
+      onCalendarDateFieldChange: setCalendarDateField,
+      onCalendarViewTypeChange: setCalendarViewType,
+      onOpenInChange: setOpenIn,
+      onCompactViewChange: setCompactView,
     }),
     []
   );
@@ -122,6 +163,13 @@ export function useEntityPageState<T>(config: EntityConfig<T>) {
     visibleGroups,
     hiddenGroups,
 
+    // Calendar state
+    calendarDateField,
+    calendarViewType,
+    openIn,
+    compactView,
+    allowedDateFields,
+
     // Computed
     supportsGrouping,
     fieldConfigData,
@@ -132,6 +180,7 @@ export function useEntityPageState<T>(config: EntityConfig<T>) {
     // Handlers
     fieldHandlers,
     groupHandlers,
+    calendarHandlers,
     resetToDefaultView,
     switchToGroupedView,
     changeViewLayout,

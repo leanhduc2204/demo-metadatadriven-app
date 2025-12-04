@@ -34,3 +34,14 @@ export enum ViewLayout {
   KANBAN = "kanban",
   CALENDAR = "calendar",
 }
+
+export enum CalendarViewType {
+  WEEK = "week",
+  MONTH = "month",
+  TIMELINE = "timeline",
+}
+
+export enum OpenInMode {
+  SIDE_PANEL = "side_panel",
+  RECORD_PAGE = "record_page",
+}

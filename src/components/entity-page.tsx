@@ -63,9 +63,15 @@ export function EntityPage<T extends { id: number }>({
         return (
           <EventCalendar
             data={data}
-            dateField={config.calendar.dateField}
-            titleField={config.primaryField as keyof T}
-            subtitleField={config.calendar.subtitleField}
+            dateField={
+              (state.calendarDateField as keyof T) || config.calendar.dateField
+            }
+            primaryField={config.primaryField as keyof T}
+            visibleFields={state.visibleFields}
+            fieldConfig={state.fieldConfigData}
+            formatters={config.formatters}
+            compactView={state.compactView}
+            calendarViewType={state.calendarViewType}
           />
         );
       }
@@ -148,6 +154,20 @@ export function EntityPage<T extends { id: number }>({
                 onHideGroup={state.groupHandlers.onHideGroup}
                 onShowGroup={state.groupHandlers.onShowGroup}
                 lockedColumns={state.lockedColumns}
+                // Calendar props
+                calendarDateField={state.calendarDateField}
+                onCalendarDateFieldChange={
+                  state.calendarHandlers.onCalendarDateFieldChange
+                }
+                allowedDateFields={state.allowedDateFields}
+                calendarViewType={state.calendarViewType}
+                onCalendarViewTypeChange={
+                  state.calendarHandlers.onCalendarViewTypeChange
+                }
+                openIn={state.openIn}
+                onOpenInChange={state.calendarHandlers.onOpenInChange}
+                compactView={state.compactView}
+                onCompactViewChange={state.calendarHandlers.onCompactViewChange}
               />
             ) : (
               <OptionsPopover
