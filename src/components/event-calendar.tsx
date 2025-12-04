@@ -11,7 +11,7 @@ import {
 import { Opportunity } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import {
-  addDays,
+  addMonths,
   eachDayOfInterval,
   endOfMonth,
   endOfWeek,
@@ -21,7 +21,7 @@ import {
   parseISO,
   startOfMonth,
   startOfWeek,
-  subDays,
+  subMonths,
 } from "date-fns";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
@@ -32,7 +32,7 @@ interface EventCalendarProps {
 }
 
 export function EventCalendar({ opportunities }: EventCalendarProps) {
-  const [date, setDate] = React.useState<Date>(new Date());
+  const [date, setDate] = useState<Date>(new Date());
 
   // Generate days for the grid
   const days = React.useMemo(() => {
@@ -61,8 +61,8 @@ export function EventCalendar({ opportunities }: EventCalendarProps) {
   };
 
   // Navigation handlers
-  const handlePrevDay = () => setDate(subDays(date, 1));
-  const handleNextDay = () => setDate(addDays(date, 1));
+  const handlePrevMonth = () => setDate(subMonths(date, 1));
+  const handleNextMonth = () => setDate(addMonths(date, 1));
   const handleToday = () => setDate(new Date());
 
   // Format functions
@@ -78,9 +78,9 @@ export function EventCalendar({ opportunities }: EventCalendarProps) {
   };
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-2">
       {/* Header Toolbar */}
-      <div className="flex items-center justify-between p-2">
+      <div className="flex items-center justify-between p-2 px-3">
         {/* Left: Date Picker Popover */}
         <div className="flex items-center gap-2">
           <Popover>
@@ -111,12 +111,12 @@ export function EventCalendar({ opportunities }: EventCalendarProps) {
         </div>
 
         {/* Right: Navigation Controls */}
-        <div className="flex items-center bg-muted/50 p-1 rounded-lg border">
+        <div className="flex items-center">
           <Button
             variant="ghost"
             size="icon"
-            onClick={handlePrevDay}
-            title="Previous Day"
+            onClick={handlePrevMonth}
+            title="Previous Month"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -131,8 +131,8 @@ export function EventCalendar({ opportunities }: EventCalendarProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleNextDay}
-            title="Next Day"
+            onClick={handleNextMonth}
+            title="Next Month"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -140,68 +140,70 @@ export function EventCalendar({ opportunities }: EventCalendarProps) {
       </div>
 
       {/* Main Content: Grid Day of Month */}
-      <div className="border rounded-md bg-background flex flex-col flex-1 min-h-[600px]">
-        {/* Day Headers */}
-        <div className="grid grid-cols-7 border-b">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div
-              key={day}
-              className="p-4 text-right text-sm font-medium text-muted-foreground border-r last:border-r-0"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 flex-1 auto-rows-fr">
-          {days.map((day) => {
-            const dayEvents = getEventsForDay(day);
-            const isSelected = isSameDay(day, date);
-            const isCurrentMonth = isSameMonth(day, date);
-
-            return (
+      <div className="px-3">
+        <div className="border rounded-md bg-background flex flex-col flex-1 min-h-[700px]">
+          {/* Day Headers */}
+          <div className="grid grid-cols-7 border-b">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
               <div
-                key={day.toString()}
-                className={cn(
-                  "min-h-[100px] p-2 border-b border-r last:border-r-0 relative transition-colors hover:bg-muted/20",
-                  !isCurrentMonth && "bg-muted/10 text-muted-foreground",
-                  isSelected && "bg-accent/10"
-                )}
-                onClick={() => setDate(day)}
+                key={day}
+                className="p-4 text-right text-sm font-medium text-muted-foreground border-r last:border-r-0"
               >
-                <div className="flex justify-end items-start mb-2">
-                  <span
-                    className={cn(
-                      "text-sm font-medium h-7 w-7 flex items-center justify-center rounded-full",
-                      isSameDay(day, new Date())
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground",
-                      isSelected &&
-                        !isSameDay(day, new Date()) &&
-                        "bg-accent text-accent-foreground"
-                    )}
-                  >
-                    {format(day, "d")}
-                  </span>
-                </div>
-
-                {/* Events List */}
-                <div className="flex flex-col gap-1 overflow-y-auto max-h-[80px]">
-                  {dayEvents.map((event) => (
-                    <Badge
-                      key={event.id}
-                      variant="secondary"
-                      className="text-xs truncate justify-start cursor-pointer px-1 py-0.5 font-normal h-auto"
-                      title={`${event.name} (${event.stage})`}
-                    >
-                      <span className="truncate w-full">{event.name}</span>
-                    </Badge>
-                  ))}
-                </div>
+                {day}
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 flex-1 auto-rows-fr">
+            {days.map((day) => {
+              const dayEvents = getEventsForDay(day);
+              const isSelected = isSameDay(day, date);
+              const isCurrentMonth = isSameMonth(day, date);
+
+              return (
+                <div
+                  key={day.toString()}
+                  className={cn(
+                    "min-h-[100px] p-2 border-b border-r last:border-r-0 relative transition-colors hover:bg-muted/20",
+                    !isCurrentMonth && "bg-muted/10 text-muted-foreground",
+                    isSelected && "bg-accent/10"
+                  )}
+                  onClick={() => setDate(day)}
+                >
+                  <div className="flex justify-end items-start mb-2">
+                    <span
+                      className={cn(
+                        "text-sm font-medium h-7 w-7 flex items-center justify-center rounded-full",
+                        isSameDay(day, new Date())
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground",
+                        isSelected &&
+                          !isSameDay(day, new Date()) &&
+                          "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      {format(day, "d")}
+                    </span>
+                  </div>
+
+                  {/* Events List */}
+                  <div className="flex flex-col gap-1 overflow-y-auto max-h-[80px]">
+                    {dayEvents.map((event) => (
+                      <Badge
+                        key={event.id}
+                        variant="secondary"
+                        className="text-xs truncate justify-start cursor-pointer px-1 py-0.5 font-normal h-auto"
+                        title={`${event.name} (${event.stage})`}
+                      >
+                        <span className="truncate w-full">{event.name}</span>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
