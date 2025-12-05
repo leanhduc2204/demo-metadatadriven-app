@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Checkbox } from "@/components/ui/checkbox";
 import { FieldConfigItem } from "@/lib/field-config";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
@@ -11,6 +12,8 @@ interface EventCardProps<T> {
   formatters?: Partial<Record<keyof T, (value: any) => ReactNode>>;
   compact?: boolean;
   className?: string;
+  selected?: boolean;
+  onSelectChange?: (selected: boolean) => void;
 }
 
 export function EventCard<T extends { id: number }>({
@@ -21,6 +24,8 @@ export function EventCard<T extends { id: number }>({
   formatters,
   compact = false,
   className,
+  selected = false,
+  onSelectChange,
 }: EventCardProps<T>) {
   // Get primary field value
   const primaryValue = item[primaryField];
@@ -43,15 +48,35 @@ export function EventCard<T extends { id: number }>({
     return String(value);
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div
       className={cn(
-        "bg-white border rounded-md p-1.5 shadow-sm hover:shadow-md transition-shadow cursor-pointer text-xs",
+        "group relative bg-white border rounded-md p-1.5 shadow-sm hover:shadow-md transition-shadow cursor-pointer text-xs",
+        selected && "ring-2 ring-primary border-primary",
         className
       )}
     >
+      {/* Checkbox - visible on hover or when selected */}
+      <div
+        className={cn(
+          "absolute top-1.5 right-1.5 z-10 transition-opacity",
+          selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        )}
+        onClick={handleCheckboxClick}
+      >
+        <Checkbox
+          checked={selected}
+          onCheckedChange={(checked) => onSelectChange?.(!!checked)}
+          className="h-4 w-4 bg-white border-neutral-300 shadow-sm"
+        />
+      </div>
+
       {/* Primary field - always visible */}
-      <div className="font-medium text-neutral-900 truncate leading-tight">
+      <div className="font-medium text-neutral-900 truncate leading-tight pr-4">
         {formattedPrimaryValue}
       </div>
 
@@ -73,7 +98,7 @@ export function EventCard<T extends { id: number }>({
                 key={field}
                 className="flex items-center gap-1 text-neutral-500"
               >
-                <Icon className="h-3 w-3 flex-shrink-0" />
+                <Icon className="h-3 w-3 shrink-0" />
                 <span className="truncate">{formattedValue}</span>
               </div>
             );

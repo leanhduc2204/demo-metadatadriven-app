@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Minimize2,
+  StretchHorizontal,
+  TextAlignJustify,
 } from "lucide-react";
 import { LayoutIcon } from "../layout-icon";
 
@@ -26,6 +27,9 @@ interface LayoutViewProps {
   onOpenCalendarView?: () => void;
   onOpenOpenIn?: () => void;
   onCompactViewChange?: (compact: boolean) => void;
+  // Kanban specific options
+  currentGroupByLabel?: string;
+  onOpenGroup?: () => void;
 }
 
 const layoutOptions: {
@@ -73,8 +77,12 @@ export function LayoutView({
   onOpenCalendarView,
   onOpenOpenIn,
   onCompactViewChange,
+  // Kanban props
+  currentGroupByLabel,
+  onOpenGroup,
 }: LayoutViewProps) {
   const isCalendarSelected = currentLayout === ViewLayout.CALENDAR;
+  const isKanbanSelected = currentLayout === ViewLayout.KANBAN;
 
   return (
     <>
@@ -169,8 +177,61 @@ export function LayoutView({
 
             <div className="flex items-center justify-between w-full text-neutral-500 px-3 py-1.5">
               <div className="flex flex-1 items-center gap-2">
-                <Minimize2 className="h-4 w-4" />
-                <span className="text-sm">Compact view</span>
+                <TextAlignJustify className="h-4 w-4" />
+                <span className="text-sm font-medium">Compact view</span>
+              </div>
+              <Switch
+                checked={compactView}
+                onCheckedChange={onCompactViewChange}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Kanban specific options - only show when Kanban is selected */}
+      {isKanbanSelected && (
+        <>
+          <Separator />
+          <div className="py-1 px-0.5 flex flex-col gap-1">
+            <Button
+              variant={"ghost"}
+              className="justify-between w-full text-neutral-500"
+              size={"sm"}
+              onClick={onOpenGroup}
+            >
+              <div className="flex flex-1 items-center gap-2">
+                <StretchHorizontal className="h-4 w-4" />
+                <span>Group</span>
+              </div>
+              <div className="flex items-center gap-2 text-neutral-400">
+                <span>{currentGroupByLabel}</span>
+                <ChevronRight size={16} />
+              </div>
+            </Button>
+
+            <Button
+              variant={"ghost"}
+              className="justify-between w-full text-neutral-500"
+              size={"sm"}
+              onClick={onOpenOpenIn}
+            >
+              <div className="flex flex-1 items-center gap-2">
+                <ExternalLink className="h-4 w-4" />
+                <span>Open in</span>
+              </div>
+              <div className="flex items-center gap-2 text-neutral-400">
+                <span>
+                  {currentOpenIn ? openInLabels[currentOpenIn] : "Side panel"}
+                </span>
+                <ChevronRight size={16} />
+              </div>
+            </Button>
+
+            <div className="flex items-center justify-between w-full text-neutral-500 px-3 py-1.5">
+              <div className="flex flex-1 items-center gap-2">
+                <TextAlignJustify className="h-4 w-4" />
+                <span className="text-sm font-medium">Compact view</span>
               </div>
               <Switch
                 checked={compactView}

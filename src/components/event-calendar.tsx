@@ -54,6 +54,22 @@ export function EventCalendar<T extends { id: number }>({
   const [date, setDate] = useState<Date>(new Date());
   const [month, setMonth] = useState<Date>(date);
 
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  // Toggle selection for an item
+  const toggleSelection = (id: number, selected: boolean) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(id);
+      } else {
+        newSet.delete(id);
+      }
+      return newSet;
+    });
+  };
+
   useEffect(() => {
     setMonth(date);
   }, [date]);
@@ -225,6 +241,10 @@ export function EventCalendar<T extends { id: number }>({
                     fieldConfig={fieldConfig}
                     formatters={formatters}
                     compact={compactView}
+                    selected={selectedIds.has(event.id)}
+                    onSelectChange={(selected) =>
+                      toggleSelection(event.id, selected)
+                    }
                   />
                 ))}
               </div>
@@ -285,6 +305,10 @@ export function EventCalendar<T extends { id: number }>({
                     fieldConfig={fieldConfig}
                     formatters={formatters}
                     compact={compactView}
+                    selected={selectedIds.has(event.id)}
+                    onSelectChange={(selected) =>
+                      toggleSelection(event.id, selected)
+                    }
                   />
                 ))}
               </div>
@@ -300,7 +324,7 @@ export function EventCalendar<T extends { id: number }>({
       <div className="border rounded-md bg-background flex flex-col flex-1 min-h-[600px]">
         {/* Timeline Header - Days of month */}
         <div className="flex border-b overflow-x-auto">
-          <div className="w-48 flex-shrink-0 p-3 border-r bg-muted/30 font-medium text-sm">
+          <div className="w-48 shrink-0 p-3 border-r bg-muted/30 font-medium text-sm">
             Events
           </div>
           <div className="flex">
@@ -308,7 +332,7 @@ export function EventCalendar<T extends { id: number }>({
               <div
                 key={day.toString()}
                 className={cn(
-                  "w-10 flex-shrink-0 p-2 text-center border-r text-xs",
+                  "w-10 shrink-0 p-2 text-center border-r text-xs",
                   isSameDay(day, new Date()) && "bg-primary/10"
                 )}
               >
@@ -341,7 +365,7 @@ export function EventCalendar<T extends { id: number }>({
 
               return (
                 <div key={event.id} className="flex border-b hover:bg-muted/20">
-                  <div className="w-48 flex-shrink-0 p-2 border-r">
+                  <div className="w-48 shrink-0 p-2 border-r">
                     <EventCard
                       item={event}
                       primaryField={primaryField}
@@ -349,6 +373,10 @@ export function EventCalendar<T extends { id: number }>({
                       fieldConfig={fieldConfig}
                       formatters={formatters}
                       compact={compactView}
+                      selected={selectedIds.has(event.id)}
+                      onSelectChange={(selected) =>
+                        toggleSelection(event.id, selected)
+                      }
                     />
                   </div>
                   <div className="flex flex-1">
@@ -356,7 +384,7 @@ export function EventCalendar<T extends { id: number }>({
                       <div
                         key={day.toString()}
                         className={cn(
-                          "w-10 flex-shrink-0 border-r relative",
+                          "w-10 shrink-0 border-r relative",
                           isSameDay(day, new Date()) && "bg-primary/5"
                         )}
                       >
@@ -417,6 +445,21 @@ export function EventCalendar<T extends { id: number }>({
               />
             </PopoverContent>
           </Popover>
+
+          {/* Selection indicator */}
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-neutral-600">
+                {selectedIds.size} selected
+              </span>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="text-primary hover:underline"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right: Navigation Controls */}

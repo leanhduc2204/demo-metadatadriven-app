@@ -151,6 +151,9 @@ export function GroupedOptionsPopover({
             onOpenCalendarView={() => setView("calendar-view")}
             onOpenOpenIn={() => setView("open-in")}
             onCompactViewChange={onCompactViewChange}
+            // Kanban props
+            currentGroupByLabel={fieldConfig[groupBy]?.label || groupBy}
+            onOpenGroup={() => setView("group")}
           />
         );
       case "fields":

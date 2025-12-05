@@ -8,6 +8,7 @@ import { FilterPopover } from "@/components/filter-popover";
 import { FilterSortBar } from "@/components/filter-sort-bar";
 import { GroupedDataTable } from "@/components/grouped-data-table";
 import { EventCalendar } from "@/components/event-calendar";
+import { KanbanBoard } from "@/components/kanban-board";
 import { GroupedOptionsPopover } from "@/components/grouped-options-popover";
 import { OptionsPopover } from "@/components/options-popover";
 import { SortPopover } from "@/components/sort-popover";
@@ -71,9 +72,16 @@ export function EntityPage<T extends { id: number }>({
       }
       if (state.viewLayout === ViewLayout.KANBAN) {
         return (
-          <div className="p-4 text-center text-neutral-500">
-            Kanban View (Coming Soon)
-          </div>
+          <KanbanBoard
+            data={data}
+            groupBy={state.groupBy}
+            groups={state.visibleGroups}
+            primaryField={config.primaryField as keyof T}
+            visibleFields={state.visibleFields}
+            fieldConfig={state.fieldConfigData}
+            formatters={config.formatters}
+            compactView={state.compactView}
+          />
         );
       }
       if (state.viewLayout === ViewLayout.CALENDAR && config.calendar) {

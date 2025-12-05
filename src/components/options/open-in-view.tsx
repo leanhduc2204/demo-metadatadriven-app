@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { OpenInMode } from "@/types/common";
-import { Check, ChevronLeft, PanelRight, FileText } from "lucide-react";
+import { Check, ChevronLeft, PanelRight, PanelTop } from "lucide-react";
 
 interface OpenInViewProps {
   currentOpenIn: OpenInMode;
@@ -22,7 +22,7 @@ const openInOptions: {
   {
     label: "Record page",
     value: OpenInMode.RECORD_PAGE,
-    icon: <FileText className="h-4 w-4" />,
+    icon: <PanelTop className="h-4 w-4" />,
   },
 ];
 
