@@ -8,10 +8,10 @@ import {
   Target,
   SquareCheckBig,
   List,
-  Layers,
-  ListFilter,
+  Table2,
 } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -65,7 +65,7 @@ export const items: SidebarItemConfig[] = [
       {
         title: "By Stage",
         url: "/opportunities?view=stage",
-        icon: Layers,
+        icon: Table2,
       },
     ],
   },
@@ -82,7 +82,7 @@ export const items: SidebarItemConfig[] = [
       {
         title: "By Status",
         url: "/tasks?view=status",
-        icon: ListFilter,
+        icon: Table2,
       },
     ],
   },
@@ -94,9 +94,13 @@ export function AppSidebar() {
   const searchParams = useSearchParams();
   const { state: sidebarState } = useSidebar();
   const isCollapsed = sidebarState === "collapsed";
-  const [expandedParents, setExpandedParents] = useState<
-    Record<string, boolean>
-  >({});
+  const [manualOverride, setManualOverride] = useState<{
+    parent: string;
+    routeKey: string;
+  } | null>(null);
+  const currentRouteKey = searchParams.toString()
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname;
 
   const matchesSubRoute = useCallback(
     (subUrl: string) => {
@@ -134,25 +138,24 @@ export function AppSidebar() {
 
   const handleParentClick = (item: SidebarItemConfig) => {
     if (item.subItems?.length) {
-      setExpandedParents((prev) => {
-        if (prev[item.title]) {
-          return prev;
-        }
-        return {
-          ...prev,
-          [item.title]: true,
-        };
+      setManualOverride({
+        parent: item.title,
+        routeKey: currentRouteKey,
       });
       router.push(item.subItems[0].url);
       return;
     }
 
+    setManualOverride(null);
     router.push(item.url);
   };
 
   const handleSubItemClick = (url: string) => {
     router.push(url);
   };
+
+  const manualActiveParent =
+    manualOverride?.routeKey === currentRouteKey ? manualOverride.parent : null;
 
   return (
     <Sidebar collapsible="icon">
@@ -164,14 +167,26 @@ export function AppSidebar() {
               {items.map((item) => {
                 const hasSubItems = Boolean(item.subItems?.length);
                 const isExpanded =
-                  !!expandedParents[item.title] ||
+                  manualActiveParent === item.title ||
                   !!autoExpandedParents[item.title];
 
+                // Active logic:
+                // Parent is active if it is expanded AND has sub-items (meaning one of its children is active or it was manually opened)
+                // OR if the current URL matches its direct URL (for items without sub-items like People)
+                const isParentActive =
+                  (hasSubItems && isExpanded) || matchesSubRoute(item.url);
+
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem
+                    key={item.title}
+                    className={cn(
+                      isParentActive && "bg-neutral-200/50 rounded-md"
+                    )}
+                  >
                     <SidebarMenuButton
                       type="button"
                       tooltip={item.title}
+                      isActive={isParentActive}
                       onClick={() => handleParentClick(item)}
                     >
                       <item.icon />
@@ -182,25 +197,33 @@ export function AppSidebar() {
                       isExpanded &&
                       (isCollapsed ? (
                         <div className="mt-1 flex flex-col items-center gap-1">
-                          {item.subItems?.map((subItem) => (
-                            <Tooltip key={subItem.title}>
-                              <TooltipTrigger asChild>
-                                <button
-                                  type="button"
-                                  aria-label={subItem.title}
-                                  className="text-sidebar-foreground/80 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent border border-transparent hover:border-sidebar-border flex size-7 items-center justify-center rounded-md transition-colors opacity-50"
-                                  onClick={() =>
-                                    handleSubItemClick(subItem.url)
-                                  }
-                                >
-                                  <subItem.icon className="size-4" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="right">
-                                {subItem.title}
-                              </TooltipContent>
-                            </Tooltip>
-                          ))}
+                          {item.subItems?.map((subItem) => {
+                            const isSubActive = matchesSubRoute(subItem.url);
+                            return (
+                              <Tooltip key={subItem.title}>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    aria-label={subItem.title}
+                                    className={cn(
+                                      "flex size-7 items-center justify-center rounded-md border border-transparent transition-colors",
+                                      isSubActive
+                                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:border-sidebar-border opacity-50"
+                                    )}
+                                    onClick={() =>
+                                      handleSubItemClick(subItem.url)
+                                    }
+                                  >
+                                    <subItem.icon className="size-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="right">
+                                  {subItem.title}
+                                </TooltipContent>
+                              </Tooltip>
+                            );
+                          })}
                         </div>
                       ) : (
                         <SidebarMenuSub>
