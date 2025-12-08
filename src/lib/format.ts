@@ -67,3 +67,54 @@ export function timeFromNow(inputDate: string | Date): string {
 
   return "just now";
 }
+
+// Currency formatter
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
+}
+
+// Date/time formatter (e.g., "Dec 8, 2025 1:20 PM")
+export function formatDate(value: string | Date): string {
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+}
+
+const avatarBgClasses = [
+  "bg-red-200",
+  "bg-orange-200",
+  "bg-amber-200",
+  "bg-yellow-200",
+  "bg-lime-200",
+  "bg-green-200",
+  "bg-emerald-200",
+  "bg-teal-200",
+  "bg-cyan-200",
+  "bg-sky-200",
+  "bg-blue-200",
+  "bg-indigo-200",
+  "bg-violet-200",
+  "bg-purple-200",
+  "bg-fuchsia-200",
+  "bg-pink-200",
+  "bg-rose-200",
+];
+
+export function pickColorBySeed(seed: string): string {
+  if (!seed) return avatarBgClasses[0];
+  const hash = seed
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return avatarBgClasses[hash % avatarBgClasses.length];
+}

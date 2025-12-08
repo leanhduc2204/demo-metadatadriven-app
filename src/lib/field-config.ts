@@ -36,7 +36,7 @@ export const fieldConfig: Record<string, FieldConfigItem> = {
   city: { label: "City", icon: Map },
   jobTitle: { label: "Job Title", icon: BriefcaseBusiness },
   // Opportunity specific fields
-  name: { label: "Opportunity Name", icon: UserIcon },
+  name: { label: "Name", icon: UserIcon },
   amount: { label: "Amount", icon: CircleDollarSign },
   closeDate: { label: "Close Date", icon: CalendarClock },
   stage: { label: "Stage", icon: Target },

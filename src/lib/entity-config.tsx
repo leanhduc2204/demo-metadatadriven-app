@@ -6,7 +6,12 @@ import { opportunityFields, peopleFields, taskFields } from "./field-config";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User as UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { timeFromNow } from "./format";
+import {
+  formatCurrency,
+  formatDate,
+  pickColorBySeed,
+  timeFromNow,
+} from "./format";
 
 export type EntityViewPreset<T> = {
   view?: "all" | "grouped";
@@ -58,17 +63,6 @@ export interface EntityConfig<T> {
   >;
 }
 
-// Currency formatter
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
-
-// Date formatter
-const formatDate = (value: string) =>
-  value ? new Date(value).toLocaleDateString() : "";
-
 // Opportunity Config
 export const opportunityConfig: EntityConfig<Opportunity> = {
   name: "Opportunities",
@@ -105,8 +99,25 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
   formatters: {
     amount: formatCurrency,
     closeDate: formatDate,
-    creationDate: formatDate,
-    lastUpdate: formatDate,
+    creationDate: timeFromNow,
+    lastUpdate: timeFromNow,
+  },
+
+  customCellRenderers: {
+    name: (row: Opportunity) => {
+      const avt = row.name.charAt(0);
+      const bgClass = pickColorBySeed(row.name);
+      return (
+        <Badge variant={"secondary"} className="rounded-sm px-1">
+          <Avatar className="size-[14px]">
+            <AvatarFallback className={`text-[10px] ${bgClass}`}>
+              {avt}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-normal">{row.name}</span>
+        </Badge>
+      );
+    },
   },
 };
 
@@ -145,8 +156,8 @@ export const taskConfig: EntityConfig<Task> = {
 
   formatters: {
     dueDate: formatDate,
-    creationDate: formatDate,
-    lastUpdate: formatDate,
+    creationDate: timeFromNow,
+    lastUpdate: timeFromNow,
   },
 };
 
@@ -215,7 +226,7 @@ export const peopleConfig: EntityConfig<User> = {
       return (
         <div className="flex items-center gap-1">
           <Avatar className="size-[14px]">
-            <AvatarFallback className="bg-gray-200 text-[10px]">
+            <AvatarFallback className="bg-green-300 text-[10px]">
               {avatar}
             </AvatarFallback>
           </Avatar>
