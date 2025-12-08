@@ -3,6 +3,10 @@ import { ReactNode } from "react";
 import { CalendarViewType, OpenInMode, ViewLayout } from "@/types/common";
 import { Opportunity, Stage, Task, TaskStatus, User } from "./data";
 import { opportunityFields, peopleFields, taskFields } from "./field-config";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User as UserIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { timeFromNow } from "./format";
 
 export type EntityViewPreset<T> = {
   view?: "all" | "grouped";
@@ -39,7 +43,19 @@ export interface EntityConfig<T> {
   viewPresets?: Record<string, EntityViewPreset<T>>;
 
   // Custom formatters for specific fields
-  formatters?: Partial<Record<keyof T, (value: any) => ReactNode>>;
+  // Formatter can accept just value (backward compatible) or both value and row
+  formatters?: Partial<
+    Record<
+      keyof T,
+      ((value: any) => ReactNode) | ((value: any, row?: T) => ReactNode)
+    >
+  >;
+
+  // Custom cell renderers for complex rendering with full row context
+  // Takes precedence over formatters
+  customCellRenderers?: Partial<
+    Record<keyof T, (row: T, field: keyof T) => ReactNode>
+  >;
 }
 
 // Currency formatter
@@ -152,8 +168,60 @@ export const peopleConfig: EntityConfig<User> = {
   // No grouping - simple table view only
 
   formatters: {
-    creationDate: formatDate,
-    emails: (value: string[]) => value?.join(", ") || "",
-    phones: (value: string[]) => value?.join(", ") || "",
+    creationDate: timeFromNow,
+  },
+
+  customCellRenderers: {
+    fullName: (row: User) => {
+      const value = row.fullName;
+      const avatar = row.avatar;
+      return (
+        <Badge variant={"secondary"} className="rounded-sm px-1">
+          <Avatar className="size-[14px]">
+            {avatar ? (
+              <AvatarImage src={avatar} alt={String(value || "")} />
+            ) : null}
+            <AvatarFallback className="bg-gray-200">
+              <UserIcon className="size-[14px] text-neutral-500" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-normal">{String(value || "")}</span>
+        </Badge>
+      );
+    },
+    emails: (row: User) => {
+      return (
+        <Badge variant={"outline"}>
+          <span>{row.emails.join(", ")}</span>
+        </Badge>
+      );
+    },
+    company: (row: User) => {
+      return (
+        <Badge variant={"secondary"} className="rounded-sm px-1">
+          <span>{row.company}</span>
+        </Badge>
+      );
+    },
+    phones: (row: User) => {
+      return (
+        <Badge variant={"outline"}>
+          <span>{row.phones.join(", ")}</span>
+        </Badge>
+      );
+    },
+    createdBy: (row: User) => {
+      const avatar = row.createdBy.charAt(0);
+      return (
+        <div className="flex items-center gap-1">
+          <Avatar className="size-[14px]">
+            <AvatarFallback className="bg-gray-200 text-[10px]">
+              {avatar}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-normal">{row.createdBy}</span>
+        </div>
+      );
+    },
   },
 };

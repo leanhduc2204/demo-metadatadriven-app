@@ -51,6 +51,7 @@ export function useEntityColumns<T extends { id: number }>({
     const dataColumns: ColumnDef<T>[] = visibleFields.map((field) => {
       const fieldCfg = fieldConfig[field];
       const Icon = fieldCfg?.icon || UserIcon;
+      const customCellRenderer = config.customCellRenderers?.[field as keyof T];
       const formatter = config.formatters?.[field as keyof T];
 
       return {
@@ -66,9 +67,17 @@ export function useEntityColumns<T extends { id: number }>({
         cell: ({ row }) => {
           const value = row.original[field as keyof T];
 
-          // Use custom formatter if available
+          // Priority 1: Use custom cell renderer if available (full control)
+          if (customCellRenderer) {
+            return customCellRenderer(row.original, field as keyof T);
+          }
+
+          // Priority 2: Use formatter if available
           if (formatter) {
-            return formatter(value);
+            // Call formatter with both value and row
+            // If formatter only accepts value (backward compatible), it will ignore the second parameter
+            const formatterFn = formatter as any;
+            return formatterFn(value, row.original);
           }
 
           // Default: convert to string

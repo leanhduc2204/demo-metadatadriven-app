@@ -158,8 +158,8 @@ export function AppSidebar() {
     manualOverride?.routeKey === currentRouteKey ? manualOverride.parent : null;
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarContent>
+    <Sidebar collapsible="icon" className="border-none">
+      <SidebarContent className="bg-neutral-100">
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -180,7 +180,9 @@ export function AppSidebar() {
                   <SidebarMenuItem
                     key={item.title}
                     className={cn(
-                      isParentActive && "bg-neutral-200/50 rounded-md"
+                      isParentActive &&
+                        isCollapsed &&
+                        "bg-neutral-200 rounded-md"
                     )}
                   >
                     <SidebarMenuButton
