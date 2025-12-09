@@ -5,6 +5,7 @@ import { EntityConfig } from "@/lib/entity-config";
 import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import { EventCard } from "./event-card";
+import { Badge } from "./ui/badge";
 
 interface KanbanBoardProps<T> {
   data: T[];
@@ -90,17 +91,25 @@ export function KanbanBoard<T extends { id: number }>({
                   key={group}
                   className="w-[280px] min-w-[280px] max-w-[350px] shrink-0 px-3 py-3 border-r last:border-r-0"
                 >
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm text-neutral-700">
-                      {group}
-                    </h3>
+                  <div className="flex items-center">
+                    <Badge
+                      variant={"secondary"}
+                      className={`${
+                        (config.groupColorMap && config.groupColorMap[group]) ||
+                        "bg-neutral-100 text-neutral-700"
+                      } rounded-md px-2 py-0.5 mr-2`}
+                    >
+                      <span className="font-medium text-sm text-nowrap">
+                        {group}
+                      </span>
+                    </Badge>
                     <div className="flex items-center gap-1.5">
                       {selectedCount > 0 && (
                         <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                           {selectedCount} selected
                         </span>
                       )}
-                      <span className="text-xs text-neutral-500 bg-neutral-200 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-neutral-500">
                         {items.length}
                       </span>
                     </div>
