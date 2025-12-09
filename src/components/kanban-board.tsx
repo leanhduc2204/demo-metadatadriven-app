@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { FieldConfigItem } from "@/lib/field-config";
+import { EntityConfig } from "@/lib/entity-config";
 import { cn } from "@/lib/utils";
-import { ReactNode, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { EventCard } from "./event-card";
 
 interface KanbanBoardProps<T> {
@@ -13,7 +13,7 @@ interface KanbanBoardProps<T> {
   primaryField: keyof T;
   visibleFields: string[];
   fieldConfig: Record<string, FieldConfigItem>;
-  formatters?: Partial<Record<keyof T, (value: any) => ReactNode>>;
+  config: EntityConfig<T>;
   compactView?: boolean;
 }
 
@@ -24,7 +24,7 @@ export function KanbanBoard<T extends { id: number }>({
   primaryField,
   visibleFields,
   fieldConfig,
-  formatters,
+  config,
   compactView = false,
 }: KanbanBoardProps<T>) {
   // Selection state
@@ -88,7 +88,7 @@ export function KanbanBoard<T extends { id: number }>({
               return (
                 <div
                   key={group}
-                  className="w-[280px] min-w-[280px] max-w-[350px] flex-shrink-0 px-3 py-3 border-r last:border-r-0"
+                  className="w-[280px] min-w-[280px] max-w-[350px] shrink-0 px-3 py-3 border-r last:border-r-0"
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-sm text-neutral-700">
@@ -119,7 +119,7 @@ export function KanbanBoard<T extends { id: number }>({
                 <div
                   key={group}
                   className={cn(
-                    "w-[280px] min-w-[280px] max-w-[350px] flex-shrink-0 border-r last:border-r-0 bg-neutral-50/50",
+                    "w-[280px] min-w-[280px] max-w-[350px] shrink-0 border-r last:border-r-0 bg-neutral-50/50",
                     "flex flex-col"
                   )}
                 >
@@ -137,7 +137,8 @@ export function KanbanBoard<T extends { id: number }>({
                           primaryField={primaryField}
                           visibleFields={visibleFields}
                           fieldConfig={fieldConfig}
-                          formatters={formatters}
+                          config={config}
+                          context="kanban"
                           compact={compactView}
                           selected={selectedIds.has(item.id)}
                           onSelectChange={(selected) =>

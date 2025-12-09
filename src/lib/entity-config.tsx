@@ -63,6 +63,14 @@ export interface EntityConfig<T> {
   customCellRenderers?: Partial<
     Record<keyof T, (row: T, field: keyof T) => ReactNode>
   >;
+
+  // Context-specific formatters for primary field in EventCard
+  // Allows different formatting for kanban/calendar/table views
+  primaryFieldFormatters?: {
+    kanban?: (value: any, row: T) => ReactNode;
+    calendar?: (value: any, row: T) => ReactNode;
+    table?: (value: any, row: T) => ReactNode;
+  };
 }
 
 // Opportunity Config
@@ -111,6 +119,30 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
     closeDate: formatDate,
     creationDate: timeFromNow,
     lastUpdate: timeFromNow,
+  },
+
+  primaryFieldFormatters: {
+    // Kanban: Avatar + text format for better visual in cards
+    kanban: (value: string) => {
+      const avt = value ? value.charAt(0) : "?";
+      const bgClass = pickColorBySeed(value || "");
+      return (
+        <div className="flex items-center gap-1.5">
+          <Avatar className="size-[16px]">
+            <AvatarFallback className={`text-[10px] ${bgClass}`}>
+              {avt}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-medium text-[#171717]">
+            {String(value || "")}
+          </span>
+        </div>
+      );
+    },
+    // Calendar: Can use same simple format or customize
+    calendar: (value: string) => {
+      return String(value || "");
+    },
   },
 
   customCellRenderers: {
@@ -211,6 +243,30 @@ export const taskConfig: EntityConfig<Task> = {
     dueDate: formatDate,
     creationDate: timeFromNow,
     lastUpdate: timeFromNow,
+  },
+
+  primaryFieldFormatters: {
+    // Kanban: Avatar + text format for better visual in cards
+    kanban: (value: string) => {
+      const avt = value ? value.charAt(0) : "?";
+      const bgClass = pickColorBySeed(value || "");
+      return (
+        <div className="flex items-center gap-1.5">
+          <Avatar className="size-[16px]">
+            <AvatarFallback className={`text-[10px] ${bgClass}`}>
+              {avt}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-medium text-[#171717]">
+            {String(value || "")}
+          </span>
+        </div>
+      );
+    },
+    // Calendar: Can use same simple format or customize
+    calendar: (value: string) => {
+      return String(value || "");
+    },
   },
 };
 

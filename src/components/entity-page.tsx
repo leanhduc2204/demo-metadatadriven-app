@@ -80,7 +80,7 @@ export function EntityPage<T extends { id: number }>({
             primaryField={config.primaryField as keyof T}
             visibleFields={state.visibleFields}
             fieldConfig={state.fieldConfigData}
-            formatters={config.formatters}
+            config={config}
             compactView={state.compactView}
           />
         );
@@ -95,7 +95,7 @@ export function EntityPage<T extends { id: number }>({
             primaryField={config.primaryField as keyof T}
             visibleFields={state.visibleFields}
             fieldConfig={state.fieldConfigData}
-            formatters={config.formatters}
+            config={config}
             compactView={state.compactView}
             calendarViewType={state.calendarViewType}
           />

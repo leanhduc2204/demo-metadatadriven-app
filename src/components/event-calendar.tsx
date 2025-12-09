@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { FieldConfigItem } from "@/lib/field-config";
+import { EntityConfig } from "@/lib/entity-config";
 import { cn } from "@/lib/utils";
 import { CalendarViewType } from "@/types/common";
 import {
@@ -27,7 +27,7 @@ import {
   subWeeks,
 } from "date-fns";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EventCard } from "./event-card";
 
 interface EventCalendarProps<T> {
@@ -36,7 +36,7 @@ interface EventCalendarProps<T> {
   primaryField: keyof T;
   visibleFields: string[];
   fieldConfig: Record<string, FieldConfigItem>;
-  formatters?: Partial<Record<keyof T, (value: any) => ReactNode>>;
+  config: EntityConfig<T>;
   compactView?: boolean;
   calendarViewType?: CalendarViewType;
 }
@@ -47,7 +47,7 @@ export function EventCalendar<T extends { id: number }>({
   primaryField,
   visibleFields,
   fieldConfig,
-  formatters,
+  config,
   compactView = false,
   calendarViewType = CalendarViewType.MONTH,
 }: EventCalendarProps<T>) {
@@ -239,7 +239,8 @@ export function EventCalendar<T extends { id: number }>({
                     primaryField={primaryField}
                     visibleFields={visibleFields}
                     fieldConfig={fieldConfig}
-                    formatters={formatters}
+                    config={config}
+                    context="calendar"
                     compact={compactView}
                     selected={selectedIds.has(event.id)}
                     onSelectChange={(selected) =>
@@ -303,7 +304,8 @@ export function EventCalendar<T extends { id: number }>({
                     primaryField={primaryField}
                     visibleFields={visibleFields}
                     fieldConfig={fieldConfig}
-                    formatters={formatters}
+                    config={config}
+                    context="calendar"
                     compact={compactView}
                     selected={selectedIds.has(event.id)}
                     onSelectChange={(selected) =>
@@ -368,10 +370,10 @@ export function EventCalendar<T extends { id: number }>({
                   <div className="w-48 shrink-0 p-2 border-r">
                     <EventCard
                       item={event}
-                      primaryField={primaryField}
+                      primaryField={primaryField as keyof T}
                       visibleFields={visibleFields}
                       fieldConfig={fieldConfig}
-                      formatters={formatters}
+                      config={config}
                       compact={compactView}
                       selected={selectedIds.has(event.id)}
                       onSelectChange={(selected) =>
