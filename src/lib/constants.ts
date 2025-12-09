@@ -50,5 +50,5 @@ export const LABELS = {
 export const DEFAULTS = {
   COLUMN_MIN_SIZE: 200,
   SELECT_COLUMN_SIZE: 48,
-  ADD_COLUMN_SIZE: 1000,
+  ADD_COLUMN_SIZE: 2000,
 } as const;

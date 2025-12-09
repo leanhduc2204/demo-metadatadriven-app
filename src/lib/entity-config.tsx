@@ -206,7 +206,7 @@ export const taskConfig: EntityConfig<Task> = {
   name: "Tasks",
   entityKey: "tasks",
   fields: taskFields,
-  defaultVisibleFields: ["title", "status", "dueDate", "assignee"],
+  defaultVisibleFields: ["title", "status"],
   pinnedColumns: [COLUMN_IDS.SELECT, "title"],
   primaryField: "title",
 
@@ -244,6 +244,24 @@ export const taskConfig: EntityConfig<Task> = {
     dueDate: formatDate,
     creationDate: timeFromNow,
     lastUpdate: timeFromNow,
+  },
+
+  customCellRenderers: {
+    title: (row: Task) => {
+      const avatar = row.title.charAt(0);
+      const bgClass = pickColorBySeed(row.title);
+
+      return (
+        <Badge variant={"secondary"} className="rounded-sm px-1">
+          <Avatar className="size-[14px]">
+            <AvatarFallback className={`text-[10px] ${bgClass}`}>
+              {avatar}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-normal">{row.title}</span>
+        </Badge>
+      );
+    },
   },
 
   primaryFieldFormatters: {
