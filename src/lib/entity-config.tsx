@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactNode } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { CalendarViewType, OpenInMode, ViewLayout } from "@/types/common";
+import { ReactNode } from "react";
 import { Opportunity, Stage, Task, TaskStatus, User } from "./data";
 import { opportunityFields, peopleFields, taskFields } from "./field-config";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User as UserIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import {
   formatCurrency,
   formatDate,
@@ -129,6 +128,43 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
         </Badge>
       );
     },
+    createdBy: (row: Opportunity) => {
+      const avatar = row.createdBy.charAt(0);
+      return (
+        <div className="flex items-center gap-1">
+          <Avatar className="size-[14px]">
+            <AvatarFallback className="bg-green-300 text-[10px]">
+              {avatar}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-normal">{row.createdBy}</span>
+        </div>
+      );
+    },
+    company: (row: Opportunity) => {
+      return (
+        <Badge variant={"secondary"} className="rounded-sm px-1">
+          <span>{row.company}</span>
+        </Badge>
+      );
+    },
+    pointOfContact: (row: Opportunity) => {
+      const avatar = row.avatarPointOfContact;
+      const value = row.pointOfContact;
+      return (
+        <Badge variant={"secondary"} className="rounded-sm px-1">
+          <Avatar className="size-[14px]">
+            {avatar ? (
+              <AvatarImage src={avatar} alt={String(value || "")} />
+            ) : null}
+            <AvatarFallback className="bg-green-300 text-[10px]">
+              {value ? value.charAt(0) : "?"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[13px] font-normal">{String(value || "")}</span>
+        </Badge>
+      );
+    },
   },
 };
 
@@ -209,8 +245,8 @@ export const peopleConfig: EntityConfig<User> = {
             {avatar ? (
               <AvatarImage src={avatar} alt={String(value || "")} />
             ) : null}
-            <AvatarFallback className="bg-gray-200">
-              <UserIcon className="size-[14px] text-neutral-500" />
+            <AvatarFallback className="bg-green-300 text-[10px]">
+              {value ? value.charAt(0) : "?"}
             </AvatarFallback>
           </Avatar>
           <span className="text-[13px] font-normal">{String(value || "")}</span>

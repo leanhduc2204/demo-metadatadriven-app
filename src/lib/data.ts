@@ -47,6 +47,7 @@ export type Opportunity = {
   company: string;
   stage: string;
   pointOfContact: string;
+  avatarPointOfContact: string;
   creationDate: string;
   deletedAt?: string;
   lastUpdate?: string;
@@ -72,6 +73,7 @@ const createOpportunities = (numOpportunity: number) => {
       company: faker.company.name(),
       stage: faker.helpers.arrayElement(Object.values(Stage)),
       pointOfContact: faker.person.fullName(),
+      avatarPointOfContact: faker.image.avatar(),
       creationDate: faker.date.past().toISOString(),
       deletedAt: faker.helpers.maybe(() => faker.date.past().toISOString(), {
         probability: 0.5,
