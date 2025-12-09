@@ -19,7 +19,6 @@ import { DefaultHeader } from "./default-header";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { TableBody, TableHeader, TableRow } from "./ui/table";
-import { Stage } from "@/lib/data";
 
 interface GroupedDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,15 +29,8 @@ interface GroupedDataTableProps<TData, TValue> {
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   groups?: string[];
+  groupColorMap?: Record<string, string>;
 }
-
-const stageColorMap: Record<string, string> = {
-  [Stage.NEW]: "bg-blue-100 text-blue-700 hover:bg-blue-100",
-  [Stage.SCREENING]: "bg-purple-100 text-purple-700 hover:bg-purple-100",
-  [Stage.MEETING]: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
-  [Stage.PROPOSAL]: "bg-orange-100 text-orange-700 hover:bg-orange-100",
-  [Stage.CUSTOMER]: "bg-green-100 text-green-700 hover:bg-green-100",
-};
 
 export function GroupedDataTable<TData, TValue>({
   columns,
@@ -49,6 +41,7 @@ export function GroupedDataTable<TData, TValue>({
   rowSelection: controlledRowSelection,
   onRowSelectionChange: setControlledRowSelection,
   groups,
+  groupColorMap,
 }: GroupedDataTableProps<TData, TValue>) {
   // --- State Management ---
   const [internalRowSelection, setInternalRowSelection] =
@@ -152,22 +145,7 @@ export function GroupedDataTable<TData, TValue>({
     }
 
     const groupKeys = Object.keys(groupedData);
-    const stageOrder = [
-      Stage.NEW,
-      Stage.SCREENING,
-      Stage.MEETING,
-      Stage.PROPOSAL,
-      Stage.CUSTOMER,
-    ].map(String);
-
-    return groupKeys.sort((a, b) => {
-      const idxA = stageOrder.indexOf(a);
-      const idxB = stageOrder.indexOf(b);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-      return a.localeCompare(b);
-    });
+    return groupKeys.sort((a, b) => a.localeCompare(b));
   }, [groupedData, groups]);
 
   return (
@@ -232,7 +210,7 @@ export function GroupedDataTable<TData, TValue>({
                       <Badge
                         variant={"secondary"}
                         className={`${
-                          stageColorMap[groupName] ||
+                          (groupColorMap && groupColorMap[groupName]) ||
                           "bg-neutral-100 text-neutral-700"
                         } rounded-md px-2 py-0.5 mr-2`}
                       >

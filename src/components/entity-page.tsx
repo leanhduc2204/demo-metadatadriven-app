@@ -67,6 +67,7 @@ export function EntityPage<T extends { id: number }>({
             pinnedColumns={config.pinnedColumns}
             getRowId={(row) => String(row.id)}
             groups={state.visibleGroups}
+            groupColorMap={config.groupColorMap}
           />
         );
       }

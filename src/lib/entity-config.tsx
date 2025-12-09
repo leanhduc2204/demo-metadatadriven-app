@@ -44,6 +44,9 @@ export interface EntityConfig<T> {
     subtitleField?: keyof T; // Optional field for subtitle/badge info
   };
 
+  // Map group values to tailwind color classes
+  groupColorMap?: Record<string, string>;
+
   // Predefined view presets that can be activated via query params
   viewPresets?: Record<string, EntityViewPreset<T>>;
 
@@ -81,6 +84,14 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
       }
       return [];
     },
+  },
+
+  groupColorMap: {
+    [Stage.NEW]: "bg-blue-100 text-blue-700 hover:bg-blue-100",
+    [Stage.SCREENING]: "bg-purple-100 text-purple-700 hover:bg-purple-100",
+    [Stage.MEETING]: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
+    [Stage.PROPOSAL]: "bg-orange-100 text-orange-700 hover:bg-orange-100",
+    [Stage.CUSTOMER]: "bg-green-100 text-green-700 hover:bg-green-100",
   },
 
   calendar: {
@@ -139,6 +150,12 @@ export const taskConfig: EntityConfig<Task> = {
       }
       return [];
     },
+  },
+
+  groupColorMap: {
+    [TaskStatus.TODO]: "bg-neutral-100 text-neutral-700 hover:bg-neutral-100",
+    [TaskStatus.IN_PROGRESS]: "bg-blue-100 text-blue-700 hover:bg-blue-100",
+    [TaskStatus.DONE]: "bg-green-100 text-green-700 hover:bg-green-100",
   },
 
   calendar: {

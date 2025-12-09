@@ -6,6 +6,7 @@ import { AddColumnHeader } from "@/components/add-column-header";
 import { useMemo } from "react";
 import { User as UserIcon } from "lucide-react";
 import { EntityConfig } from "@/lib/entity-config";
+import { Badge } from "@/components/ui/badge";
 
 interface UseEntityColumnsProps<T> {
   config: EntityConfig<T>;
@@ -72,7 +73,27 @@ export function useEntityColumns<T extends { id: number }>({
             return customCellRenderer(row.original, field as keyof T);
           }
 
-          // Priority 2: Use formatter if available
+          // Priority 2: Check if this is a group column with color map
+          const isGroupColumn = field === config.grouping?.defaultGroupBy;
+          const groupColorClass =
+            isGroupColumn && config.groupColorMap
+              ? config.groupColorMap[String(value)]
+              : undefined;
+
+          if (groupColorClass) {
+            return (
+              <Badge
+                variant={"secondary"}
+                className={`${groupColorClass} rounded-md px-2 py-0.5`}
+              >
+                <span className="font-medium text-xs whitespace-nowrap">
+                  {String(value || "")}
+                </span>
+              </Badge>
+            );
+          }
+
+          // Priority 3: Use formatter if available
           if (formatter) {
             // Call formatter with both value and row
             // If formatter only accepts value (backward compatible), it will ignore the second parameter
