@@ -20,33 +20,67 @@ import {
   UserCheck,
 } from "lucide-react";
 
+export enum FieldType {
+  TEXT = "text",
+  NUMBER = "number",
+  DATE = "date",
+  EMAIL = "email",
+  PHONE = "phone",
+  ARRAY = "array",
+}
+
 export interface FieldConfigItem {
   label: string;
   icon: LucideIcon;
+  type?: FieldType;
 }
 
 export const fieldConfig: Record<string, FieldConfigItem> = {
-  id: { label: "Id", icon: ArrowDown01 },
-  fullName: { label: "Name", icon: UserIcon },
-  emails: { label: "Emails", icon: Mail },
-  company: { label: "Company", icon: Building },
-  phones: { label: "Phones", icon: Phone },
-  createdBy: { label: "Created by", icon: History },
-  creationDate: { label: "Creation date", icon: Calendar1 },
-  city: { label: "City", icon: Map },
-  jobTitle: { label: "Job Title", icon: BriefcaseBusiness },
+  id: { label: "Id", icon: ArrowDown01, type: FieldType.TEXT },
+  fullName: { label: "Name", icon: UserIcon, type: FieldType.TEXT },
+  emails: { label: "Emails", icon: Mail, type: FieldType.EMAIL },
+  company: { label: "Company", icon: Building, type: FieldType.TEXT },
+  phones: { label: "Phones", icon: Phone, type: FieldType.PHONE },
+  createdBy: { label: "Created by", icon: History, type: FieldType.TEXT },
+  creationDate: {
+    label: "Creation date",
+    icon: Calendar1,
+    type: FieldType.DATE,
+  },
+  city: { label: "City", icon: Map, type: FieldType.TEXT },
+  jobTitle: {
+    label: "Job Title",
+    icon: BriefcaseBusiness,
+    type: FieldType.TEXT,
+  },
   // Opportunity specific fields
-  name: { label: "Name", icon: UserIcon },
-  amount: { label: "Amount", icon: CircleDollarSign },
-  closeDate: { label: "Close Date", icon: CalendarClock },
-  stage: { label: "Stage", icon: Target },
-  pointOfContact: { label: "Point of Contact", icon: Contact },
-  lastUpdate: { label: "Last Update", icon: Clock },
+  name: { label: "Name", icon: UserIcon, type: FieldType.TEXT },
+  amount: { label: "Amount", icon: CircleDollarSign, type: FieldType.NUMBER },
+  closeDate: {
+    label: "Close Date",
+    icon: CalendarClock,
+    type: FieldType.DATE,
+  },
+  stage: { label: "Stage", icon: Target, type: FieldType.TEXT },
+  pointOfContact: {
+    label: "Point of Contact",
+    icon: Contact,
+    type: FieldType.TEXT,
+  },
+  lastUpdate: {
+    label: "Last Update",
+    icon: Clock,
+    type: FieldType.DATE,
+  },
   // Task specific fields
-  title: { label: "Title", icon: FileText },
-  status: { label: "Status", icon: ListTodo },
-  dueDate: { label: "Due Date", icon: CalendarDays },
-  assignee: { label: "Assignee", icon: UserCheck },
+  title: { label: "Title", icon: FileText, type: FieldType.TEXT },
+  status: { label: "Status", icon: ListTodo, type: FieldType.TEXT },
+  dueDate: {
+    label: "Due Date",
+    icon: CalendarDays,
+    type: FieldType.DATE,
+  },
+  assignee: { label: "Assignee", icon: UserCheck, type: FieldType.TEXT },
 };
 
 export const peopleFields = [
@@ -93,4 +127,23 @@ export function getFieldConfig(fields: string[]) {
     }
   });
   return config;
+}
+
+export function getDateFields(fields: string[]): string[] {
+  return fields.filter((field) => {
+    const config = fieldConfig[field];
+    // Priority 1: Use field type if available
+    if (config?.type === FieldType.DATE) {
+      return true;
+    }
+    // Priority 2: Fallback to name-based detection (backward compatibility)
+    const lowerField = field.toLowerCase();
+    return (
+      lowerField.includes("date") ||
+      lowerField === "closedate" ||
+      lowerField === "duedate" ||
+      lowerField === "creationdate" ||
+      lowerField === "lastupdate"
+    );
+  });
 }

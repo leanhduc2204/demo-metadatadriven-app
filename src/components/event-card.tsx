@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Checkbox } from "@/components/ui/checkbox";
 import { FieldConfigItem } from "@/lib/field-config";
 import { EntityConfig } from "@/lib/entity-config";
 import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
+import { formatFieldValue } from "@/lib/field-formatter";
+import { RESERVED_FIELDS } from "@/lib/constants";
 
 interface EventCardProps<T> {
   item: T;
@@ -31,101 +30,20 @@ export function EventCard<T extends { id: number }>({
   selected = false,
   onSelectChange,
 }: EventCardProps<T>) {
-  // Format primary field value (skip customCellRenderers for simplicity)
-  const formatPrimaryValue = (field: keyof T, value: any): ReactNode => {
-    // Priority 1: Use context-specific formatter if available
-    const contextFormatter = config.primaryFieldFormatters?.[context];
-    if (contextFormatter) {
-      return contextFormatter(value, item);
-    }
-
-    // Priority 2: Check if this is a group column with color map
-    const isGroupColumn = String(field) === config.grouping?.defaultGroupBy;
-    const groupColorClass =
-      isGroupColumn && config.groupColorMap
-        ? config.groupColorMap[String(value)]
-        : undefined;
-
-    if (groupColorClass) {
-      return (
-        <Badge
-          variant={"secondary"}
-          className={`${groupColorClass} rounded-md px-2 py-0.5`}
-        >
-          <span className="font-medium text-xs whitespace-nowrap">
-            {String(value || "")}
-          </span>
-        </Badge>
-      );
-    }
-
-    // Priority 3: Use formatter if available
-    if (config.formatters?.[field]) {
-      const formatter = config.formatters[field]!;
-      const formatterFn = formatter as any;
-      const formatted = formatterFn(value, item);
-      // If formatter returns ReactNode (like Badge), extract text or return as is
-      // For now, just return the formatted value
-      return formatted;
-    }
-
-    // Priority 4: Default formatting (simple text)
-    if (value === null || value === undefined) return "";
-    if (Array.isArray(value)) return value.join(", ");
-    return String(value);
-  };
-
-  // Format field value with priority (for non-primary fields)
-  const formatFieldValue = (field: string, value: any): ReactNode => {
-    const fieldKey = field as keyof T;
-
-    // Priority 1: Use custom cell renderer if available (full control)
-    if (config.customCellRenderers?.[fieldKey]) {
-      return config.customCellRenderers[fieldKey]!(item, fieldKey);
-    }
-
-    // Priority 2: Check if this is a group column with color map
-    const isGroupColumn = field === config.grouping?.defaultGroupBy;
-    const groupColorClass =
-      isGroupColumn && config.groupColorMap
-        ? config.groupColorMap[String(value)]
-        : undefined;
-
-    if (groupColorClass) {
-      return (
-        <Badge
-          variant={"secondary"}
-          className={`${groupColorClass} rounded-md px-2 py-0.5`}
-        >
-          <span className="font-medium text-xs whitespace-nowrap">
-            {String(value || "")}
-          </span>
-        </Badge>
-      );
-    }
-
-    // Priority 3: Use formatter if available
-    if (config.formatters?.[fieldKey]) {
-      const formatter = config.formatters[fieldKey]!;
-      // Call formatter with both value and row
-      // If formatter only accepts value (backward compatible), it will ignore the second parameter
-      const formatterFn = formatter as any;
-      return formatterFn(value, item);
-    }
-
-    // Priority 4: Default formatting
-    if (value === null || value === undefined) return "";
-    if (Array.isArray(value)) return value.join(", ");
-    return String(value);
-  };
-
-  // Get primary field value (skip customCellRenderers)
+  // Get primary field value
   const primaryValue = item[primaryField];
-  const formattedPrimaryValue = formatPrimaryValue(primaryField, primaryValue);
+  const formattedPrimaryValue = formatFieldValue({
+    config,
+    field: primaryField,
+    value: primaryValue,
+    row: item,
+    context,
+    isPrimaryField: true,
+  });
 
   // Get visible fields excluding primary field
   const displayFields = visibleFields.filter(
-    (field) => field !== primaryField && field !== "id"
+    (field) => field !== primaryField && field !== RESERVED_FIELDS.ID
   );
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
@@ -169,7 +87,14 @@ export function EventCard<T extends { id: number }>({
 
             const Icon = fieldCfg.icon;
             const value = item[field as keyof T];
-            const formattedValue = formatFieldValue(field, value);
+            const formattedValue = formatFieldValue({
+              config,
+              field,
+              value,
+              row: item,
+              context,
+              isPrimaryField: false,
+            });
 
             if (!formattedValue) return null;
 

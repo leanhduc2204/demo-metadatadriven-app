@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { fieldConfig } from "@/lib/field-config";
 import { AddColumnHeader } from "@/components/add-column-header";
-import { useMemo } from "react";
-import { User as UserIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { COLUMN_IDS, DEFAULTS } from "@/lib/constants";
 import { EntityConfig } from "@/lib/entity-config";
-import { Badge } from "@/components/ui/badge";
+import { fieldConfig } from "@/lib/field-config";
+import { formatFieldValue } from "@/lib/field-formatter";
+import { ColumnDef } from "@tanstack/react-table";
+import { User as UserIcon } from "lucide-react";
+import { useMemo } from "react";
 
 interface UseEntityColumnsProps<T> {
   config: EntityConfig<T>;
@@ -22,8 +22,8 @@ export function useEntityColumns<T extends { id: number }>({
   const columns = useMemo<ColumnDef<T>[]>(() => {
     // Select column
     const selectColumn: ColumnDef<T> = {
-      id: "select",
-      size: 48,
+      id: COLUMN_IDS.SELECT,
+      size: DEFAULTS.SELECT_COLUMN_SIZE,
       header: ({ table }) => (
         <div className="h-full flex items-center">
           <Checkbox
@@ -52,12 +52,10 @@ export function useEntityColumns<T extends { id: number }>({
     const dataColumns: ColumnDef<T>[] = visibleFields.map((field) => {
       const fieldCfg = fieldConfig[field];
       const Icon = fieldCfg?.icon || UserIcon;
-      const customCellRenderer = config.customCellRenderers?.[field as keyof T];
-      const formatter = config.formatters?.[field as keyof T];
 
       return {
         id: field,
-        minSize: 200,
+        minSize: DEFAULTS.COLUMN_MIN_SIZE,
         accessorKey: field,
         header: () => (
           <div className="flex items-center gap-2">
@@ -67,50 +65,21 @@ export function useEntityColumns<T extends { id: number }>({
         ),
         cell: ({ row }) => {
           const value = row.original[field as keyof T];
-
-          // Priority 1: Use custom cell renderer if available (full control)
-          if (customCellRenderer) {
-            return customCellRenderer(row.original, field as keyof T);
-          }
-
-          // Priority 2: Check if this is a group column with color map
-          const isGroupColumn = field === config.grouping?.defaultGroupBy;
-          const groupColorClass =
-            isGroupColumn && config.groupColorMap
-              ? config.groupColorMap[String(value)]
-              : undefined;
-
-          if (groupColorClass) {
-            return (
-              <Badge
-                variant={"secondary"}
-                className={`${groupColorClass} rounded-md px-2 py-0.5`}
-              >
-                <span className="font-medium text-xs whitespace-nowrap">
-                  {String(value || "")}
-                </span>
-              </Badge>
-            );
-          }
-
-          // Priority 3: Use formatter if available
-          if (formatter) {
-            // Call formatter with both value and row
-            // If formatter only accepts value (backward compatible), it will ignore the second parameter
-            const formatterFn = formatter as any;
-            return formatterFn(value, row.original);
-          }
-
-          // Default: convert to string
-          return String(value ?? "");
+          return formatFieldValue({
+            config,
+            field,
+            value,
+            row: row.original,
+            isPrimaryField: false,
+          });
         },
       };
     });
 
     // Add column header
     const addColumnColumn: ColumnDef<T> = {
-      id: "add-column",
-      size: 1000,
+      id: COLUMN_IDS.ADD_COLUMN,
+      size: DEFAULTS.ADD_COLUMN_SIZE,
       header: () => (
         <AddColumnHeader
           visibleFields={visibleFields}

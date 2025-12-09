@@ -11,9 +11,10 @@ import {
   pickColorBySeed,
   timeFromNow,
 } from "./format";
+import { COLUMN_IDS, VIEW_TYPES } from "./constants";
 
 export type EntityViewPreset<T> = {
-  view?: "all" | "grouped";
+  view?: typeof VIEW_TYPES.ALL | typeof VIEW_TYPES.GROUPED;
   layout?: ViewLayout;
   groupBy?: keyof T & string;
   calendarDateField?: keyof T;
@@ -79,7 +80,7 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
   entityKey: "opportunities",
   fields: opportunityFields,
   defaultVisibleFields: ["name", "amount", "stage", "closeDate", "company"],
-  pinnedColumns: ["select", "name"],
+  pinnedColumns: [COLUMN_IDS.SELECT, "name"],
   primaryField: "name",
 
   grouping: {
@@ -108,7 +109,7 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
 
   viewPresets: {
     stage: {
-      view: "grouped",
+      view: VIEW_TYPES.GROUPED,
       layout: ViewLayout.TABLE,
       groupBy: "stage",
     },
@@ -206,7 +207,7 @@ export const taskConfig: EntityConfig<Task> = {
   entityKey: "tasks",
   fields: taskFields,
   defaultVisibleFields: ["title", "status", "dueDate", "assignee"],
-  pinnedColumns: ["select", "title"],
+  pinnedColumns: [COLUMN_IDS.SELECT, "title"],
   primaryField: "title",
 
   grouping: {
@@ -233,7 +234,7 @@ export const taskConfig: EntityConfig<Task> = {
 
   viewPresets: {
     status: {
-      view: "grouped",
+      view: VIEW_TYPES.GROUPED,
       layout: ViewLayout.TABLE,
       groupBy: "status",
     },
@@ -283,7 +284,7 @@ export const peopleConfig: EntityConfig<User> = {
     "city",
     "jobTitle",
   ],
-  pinnedColumns: ["select", "fullName"],
+  pinnedColumns: [COLUMN_IDS.SELECT, "fullName"],
   primaryField: "fullName",
   // No grouping - simple table view only
 
