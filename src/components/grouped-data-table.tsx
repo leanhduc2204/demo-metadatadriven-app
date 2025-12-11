@@ -212,9 +212,9 @@ export function GroupedDataTable<TData, TValue>({
                         className={`${
                           (groupColorMap && groupColorMap[groupName]) ||
                           "bg-neutral-100 text-neutral-700"
-                        } rounded-md px-2 py-0.5 mr-2`}
+                        } rounded-sm px-1.5 py-0.5 mr-2`}
                       >
-                        <span className="font-medium text-sm text-nowrap">
+                        <span className="font-medium text-[13px] text-nowrap">
                           {groupName}
                         </span>
                       </Badge>
@@ -252,7 +252,7 @@ export function GroupedDataTable<TData, TValue>({
                               variant="ghost"
                               size="sm"
                               onClick={() => loadMore(groupName)}
-                              className="h-8 text-neutral-500 hover:text-neutral-900 font-normal"
+                              className="h-8 text-neutral-500 hover:text-neutral-900 font-normal text-[13px]"
                             >
                               <ArrowDown size={14} className="mr-2" />
                               Load more

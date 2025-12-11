@@ -9,6 +9,7 @@ export function DefaultCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
     <TableCell
       key={cell.id}
       className={cn(
+        "p-1 px-2",
         cell.column.id !== "select" && cell.column.id !== "add-column"
           ? "border-r"
           : "",

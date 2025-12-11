@@ -134,7 +134,7 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
               {avt}
             </AvatarFallback>
           </Avatar>
-          <span className="text-[13px] font-medium text-[#171717]">
+          <span className="text-sm font-medium text-[#171717]">
             {String(value || "")}
           </span>
         </div>

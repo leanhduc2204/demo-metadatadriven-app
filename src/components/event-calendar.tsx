@@ -184,7 +184,7 @@ export function EventCalendar<T extends { id: number }>({
 
   // Render different views
   const renderMonthView = () => (
-    <div className="border rounded-md bg-background flex flex-col">
+    <div className="border rounded-xs bg-background flex flex-col">
       {/* Day Headers */}
       <div className="grid grid-cols-7 border-b">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (

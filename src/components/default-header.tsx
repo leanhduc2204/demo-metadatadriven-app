@@ -14,7 +14,7 @@ export function DefaultHeader<TData>({
       key={header.column.id}
       colSpan={header.colSpan}
       className={cn(
-        "relative flex items-center bg-background p-2",
+        "relative flex items-center bg-background p-1 px-2",
         header.id !== "add-column" && header.id !== "select" ? "border-r" : "",
         isPinned
           ? "sticky z-30 border-r-2 border-r-border shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"

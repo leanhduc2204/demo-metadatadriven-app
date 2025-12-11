@@ -53,7 +53,7 @@ export function EventCard<T extends { id: number }>({
   return (
     <div
       className={cn(
-        "group relative bg-white border rounded-md p-1.5 shadow-sm hover:shadow-md transition-shadow cursor-pointer text-xs",
+        "group relative bg-white border rounded-sm p-1.5 shadow-sm hover:shadow-md transition-shadow cursor-pointer text-xs",
         selected && "ring-2 ring-primary border-primary",
         className
       )}
@@ -74,13 +74,13 @@ export function EventCard<T extends { id: number }>({
       </div>
 
       {/* Primary field - always visible */}
-      <div className="text-[13px] font-medium text-[#171717] truncate leading-tight pr-4">
+      <div className="text-sm font-medium text-[#171717] truncate leading-tight pr-4">
         {formattedPrimaryValue}
       </div>
 
       {/* Additional fields - only in full mode */}
       {!compact && displayFields.length > 0 && (
-        <div className="mt-1 space-y-0.5">
+        <div className="mt-2 space-y-1.5">
           {displayFields.map((field) => {
             const fieldCfg = fieldConfig[field];
             if (!fieldCfg) return null;
@@ -101,9 +101,9 @@ export function EventCard<T extends { id: number }>({
             return (
               <div
                 key={field}
-                className="flex items-center gap-1 text-neutral-500"
+                className="flex items-center gap-1.5 text-neutral-400"
               >
-                <Icon className="h-3 w-3 shrink-0" />
+                <Icon className="size-3.5 shrink-0" />
                 <span className="truncate text-[13px] text-[#333333] font-normal">
                   {formattedValue}
                 </span>

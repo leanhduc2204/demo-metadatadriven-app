@@ -51,7 +51,7 @@ export function formatFieldValue<T extends { id: number }>({
     return (
       <Badge
         variant={"secondary"}
-        className={`${groupColorClass} rounded-md px-2 py-0.5`}
+        className={`${groupColorClass} rounded-md px-1.5 py-0.5`}
       >
         <span className="font-medium text-xs whitespace-nowrap">
           {String(value || "")}
