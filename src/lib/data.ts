@@ -1,4 +1,8 @@
 import { faker } from "@faker-js/faker";
+import googleIcon from "@/assets/images/google.png";
+import appleIcon from "@/assets/images/apple-logo.png";
+import microsoftIcon from "@/assets/images/microsoft.png";
+import metaIcon from "@/assets/images/meta.png";
 
 // People data schema
 
@@ -6,7 +10,7 @@ export type User = {
   id: number;
   fullName: string;
   emails: string[];
-  company: string;
+  company: Company;
   phones: string[];
   createdBy: string;
   avatar?: string;
@@ -15,6 +19,35 @@ export type User = {
   jobTitle: string;
 };
 
+export type Company = {
+  id: number;
+  name: string;
+  icon: string;
+};
+
+export const companies: Company[] = [
+  {
+    id: 1,
+    name: "Google",
+    icon: googleIcon.src,
+  },
+  {
+    id: 2,
+    name: "Apple",
+    icon: appleIcon.src,
+  },
+  {
+    id: 3,
+    name: "Microsoft",
+    icon: microsoftIcon.src,
+  },
+  {
+    id: 4,
+    name: "Meta",
+    icon: metaIcon.src,
+  },
+];
+
 const createUsers = (numUser: number) => {
   const users: User[] = [];
   for (let i = 0; i < numUser; i++) {
@@ -22,7 +55,7 @@ const createUsers = (numUser: number) => {
       id: i + 1,
       fullName: faker.person.fullName(),
       emails: [faker.internet.email()],
-      company: faker.company.name(),
+      company: faker.helpers.arrayElement(companies),
       phones: [faker.phone.number()],
       createdBy: faker.person.fullName(),
       avatar: faker.image.avatar(),
@@ -44,7 +77,7 @@ export type Opportunity = {
   amount: number;
   createdBy: string;
   closeDate: string;
-  company: string;
+  company: Company;
   stage: string;
   pointOfContact: string;
   avatarPointOfContact: string;
@@ -70,7 +103,7 @@ const createOpportunities = (numOpportunity: number) => {
       amount: faker.number.int({ min: 1000, max: 100000 }),
       createdBy: faker.person.fullName(),
       closeDate: faker.date.future().toISOString(),
-      company: faker.company.name(),
+      company: faker.helpers.arrayElement(companies),
       stage: faker.helpers.arrayElement(Object.values(Stage)),
       pointOfContact: faker.person.fullName(),
       avatarPointOfContact: faker.image.avatar(),

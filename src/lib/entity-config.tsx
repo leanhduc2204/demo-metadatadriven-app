@@ -177,7 +177,10 @@ export const opportunityConfig: EntityConfig<Opportunity> = {
     company: (row: Opportunity) => {
       return (
         <Badge variant={"secondary"} className="rounded-sm px-1">
-          <span>{row.company}</span>
+          <Avatar className="size-[14px]">
+            <AvatarImage src={row.company.icon} alt={row.company.name} />
+          </Avatar>
+          <span>{row.company.name}</span>
         </Badge>
       );
     },
@@ -338,7 +341,10 @@ export const peopleConfig: EntityConfig<User> = {
     company: (row: User) => {
       return (
         <Badge variant={"secondary"} className="rounded-sm px-1">
-          <span>{row.company}</span>
+          <Avatar className="size-[14px]">
+            <AvatarImage src={row.company.icon} alt={row.company.name} />
+          </Avatar>
+          <span>{row.company.name}</span>
         </Badge>
       );
     },
