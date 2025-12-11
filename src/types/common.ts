@@ -6,8 +6,20 @@ export enum SortBy {
 export enum FilterOperator {
   CONTAINS = "contains",
   DOES_NOT_CONTAIN = "does_not_contain",
+  IS = "is",
+  IS_NOT = "is_not",
   IS_EMPTY = "is_empty",
   IS_NOT_EMPTY = "is_not_empty",
+
+  GREATER_THAN_OR_EQUAL = "greater_than_or_equal",
+  LESS_THAN_OR_EQUAL = "less_than_or_equal",
+
+  IS_RELATIVE = "is_relative",
+  IS_IN_PAST = "is_in_past",
+  IS_IN_FUTURE = "is_in_future",
+  IS_TODAY = "is_today",
+  IS_BEFORE = "IS_BEFORE",
+  IS_AFTER = "IS_AFTER",
 }
 
 export interface FilterCondition {

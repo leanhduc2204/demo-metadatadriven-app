@@ -24,8 +24,6 @@ export enum FieldType {
   TEXT = "text",
   NUMBER = "number",
   DATE = "date",
-  EMAIL = "email",
-  PHONE = "phone",
   ARRAY = "array",
 }
 
@@ -38,9 +36,9 @@ export interface FieldConfigItem {
 export const fieldConfig: Record<string, FieldConfigItem> = {
   id: { label: "Id", icon: ArrowDown01, type: FieldType.TEXT },
   fullName: { label: "Name", icon: UserIcon, type: FieldType.TEXT },
-  emails: { label: "Emails", icon: Mail, type: FieldType.EMAIL },
-  company: { label: "Company", icon: Building, type: FieldType.TEXT },
-  phones: { label: "Phones", icon: Phone, type: FieldType.PHONE },
+  emails: { label: "Emails", icon: Mail, type: FieldType.TEXT },
+  company: { label: "Company", icon: Building, type: FieldType.ARRAY },
+  phones: { label: "Phones", icon: Phone, type: FieldType.TEXT },
   createdBy: { label: "Created by", icon: History, type: FieldType.TEXT },
   creationDate: {
     label: "Creation date",
@@ -61,7 +59,7 @@ export const fieldConfig: Record<string, FieldConfigItem> = {
     icon: CalendarClock,
     type: FieldType.DATE,
   },
-  stage: { label: "Stage", icon: Target, type: FieldType.TEXT },
+  stage: { label: "Stage", icon: Target, type: FieldType.ARRAY },
   pointOfContact: {
     label: "Point of Contact",
     icon: Contact,
@@ -74,7 +72,7 @@ export const fieldConfig: Record<string, FieldConfigItem> = {
   },
   // Task specific fields
   title: { label: "Title", icon: FileText, type: FieldType.TEXT },
-  status: { label: "Status", icon: ListTodo, type: FieldType.TEXT },
+  status: { label: "Status", icon: ListTodo, type: FieldType.ARRAY },
   dueDate: {
     label: "Due Date",
     icon: CalendarDays,

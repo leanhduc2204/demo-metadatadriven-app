@@ -5,13 +5,6 @@ export const SORT_BY_OPTIONS = {
   [SortBy.DESC]: "Descending",
 } as const;
 
-export const FILTER_OPERATOR_OPTIONS = {
-  [FilterOperator.CONTAINS]: "Contains",
-  [FilterOperator.DOES_NOT_CONTAIN]: "Does not contain",
-  [FilterOperator.IS_EMPTY]: "Is empty",
-  [FilterOperator.IS_NOT_EMPTY]: "Is not empty",
-} as const;
-
 export const SORT_ORDER_OPTIONS = {
   [SortOrder.MANUAL]: "Manual",
   [SortOrder.ALPHABETICAL]: "Alphabetical",
@@ -51,4 +44,21 @@ export const DEFAULTS = {
   COLUMN_MIN_SIZE: 200,
   SELECT_COLUMN_SIZE: 48,
   ADD_COLUMN_SIZE: 2000,
+} as const;
+
+export const FILTER_OPERATOR_OPTIONS = {
+  [FilterOperator.CONTAINS]: "Contains",
+  [FilterOperator.DOES_NOT_CONTAIN]: "Does not contain",
+  [FilterOperator.IS]: "Is",
+  [FilterOperator.IS_NOT]: "Is not",
+  [FilterOperator.GREATER_THAN_OR_EQUAL]: "Greater than or equal",
+  [FilterOperator.LESS_THAN_OR_EQUAL]: "Less than or equal",
+  [FilterOperator.IS_RELATIVE]: "Is relative",
+  [FilterOperator.IS_IN_PAST]: "Is in past",
+  [FilterOperator.IS_IN_FUTURE]: "Is in future",
+  [FilterOperator.IS_TODAY]: "Is today",
+  [FilterOperator.IS_BEFORE]: "Is before",
+  [FilterOperator.IS_AFTER]: "Is after",
+  [FilterOperator.IS_EMPTY]: "Is empty",
+  [FilterOperator.IS_NOT_EMPTY]: "Is not empty",
 } as const;
