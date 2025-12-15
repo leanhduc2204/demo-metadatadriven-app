@@ -147,6 +147,13 @@ export function EntityPage<T extends { id: number }>({
               visibleFields={state.visibleFields}
               searchFields={state.searchFields}
               onSearchFieldsChange={state.setSearchFields}
+              getArrayFieldValues={(field: string) => {
+                // Use grouping.getGroupValues if available
+                if (config.grouping?.getGroupValues) {
+                  return config.grouping.getGroupValues(field);
+                }
+                return [];
+              }}
               open={state.isFilterOpen}
               onOpenChange={state.setIsFilterOpen}
             />

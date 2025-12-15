@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FilterOperator } from "@/types/common";
+import { FieldConfigItem, getArrayFieldValues } from "@/lib/field-config";
+import { getDefaultOperator } from "@/lib/filter-operators";
 import { useFilterStore } from "@/stores/use-filter-store";
-import { FieldConfigItem } from "@/lib/field-config";
+import { useState } from "react";
 import { FilterItem } from "./filter/filter-item";
 import { FilterMenu } from "./filter/filter-menu";
 
@@ -18,6 +18,7 @@ interface FilterPopoverProps {
   visibleFields: string[];
   searchFields: string;
   onSearchFieldsChange: (value: string) => void;
+  getArrayFieldValues?: (field: string) => string[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -27,6 +28,7 @@ export function FilterPopover({
   visibleFields,
   searchFields,
   onSearchFieldsChange,
+  getArrayFieldValues: getArrayFieldValuesProp,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: FilterPopoverProps) {
@@ -48,10 +50,12 @@ export function FilterPopover({
     if (filters.find((f) => f.field === field)) {
       setActiveFilterId(field);
     } else {
+      const fieldConfigItem = fieldConfig[field];
+      const defaultOperator = getDefaultOperator(fieldConfigItem?.type, field);
       addFilter({
         id: field,
         field,
-        operator: FilterOperator.CONTAINS,
+        operator: defaultOperator,
         value: "",
       });
       setActiveFilterId(field);
@@ -60,9 +64,19 @@ export function FilterPopover({
 
   const renderContent = () => {
     if (activeFilterId && activeFilter) {
+      const fieldConfigItem = fieldConfig[activeFilter.field];
+      // Get array field values: try from prop first, then fallback to default function
+      const propValues = getArrayFieldValuesProp?.(activeFilter.field);
+      const arrayFieldValues =
+        propValues && propValues.length > 0
+          ? propValues
+          : getArrayFieldValues(activeFilter.field);
       return (
         <FilterItem
-          label={fieldConfig[activeFilter.field]?.label || activeFilter.field}
+          label={fieldConfigItem?.label || activeFilter.field}
+          field={activeFilter.field}
+          fieldType={fieldConfigItem?.type}
+          arrayFieldValues={arrayFieldValues}
           onBack={() => setActiveFilterId(null)}
           onSelectOperator={(op) =>
             updateFilter(activeFilterId, { operator: op })

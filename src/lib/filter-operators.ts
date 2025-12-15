@@ -11,6 +11,8 @@ export const FIELD_TYPE_OPERATORS = {
   [FieldType.NUMBER]: [
     FilterOperator.GREATER_THAN_OR_EQUAL,
     FilterOperator.LESS_THAN_OR_EQUAL,
+    FilterOperator.IS,
+    FilterOperator.IS_NOT,
     FilterOperator.IS_EMPTY,
     FilterOperator.IS_NOT_EMPTY,
   ],
@@ -33,8 +35,30 @@ export const FIELD_TYPE_OPERATORS = {
   ],
 };
 
-export function getAvailableOperators(fieldType: FieldType): FilterOperator[] {
+export function getAvailableOperators(
+  fieldType: FieldType,
+  fieldName?: string
+): FilterOperator[] {
+  // Field "id" only supports IS operator
+  if (fieldName === "id") {
+    return [FilterOperator.IS];
+  }
   return (
     FIELD_TYPE_OPERATORS[fieldType] || FIELD_TYPE_OPERATORS[FieldType.TEXT]
   );
+}
+
+export function getDefaultOperator(
+  fieldType?: FieldType,
+  fieldName?: string
+): FilterOperator {
+  // Field "id" defaults to IS operator
+  if (fieldName === "id") {
+    return FilterOperator.IS;
+  }
+  if (!fieldType) {
+    return FilterOperator.CONTAINS;
+  }
+  const operators = getAvailableOperators(fieldType, fieldName);
+  return operators[0] || FilterOperator.CONTAINS;
 }

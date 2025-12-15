@@ -19,6 +19,7 @@ import {
   CalendarDays,
   UserCheck,
 } from "lucide-react";
+import { companies, Stage, TaskStatus } from "./data";
 
 export enum FieldType {
   TEXT = "text",
@@ -144,4 +145,18 @@ export function getDateFields(fields: string[]): string[] {
       lowerField === "lastupdate"
     );
   });
+}
+
+export function getArrayFieldValues(field: string): string[] {
+  if (field === "company") {
+    // For company field, return company names
+    return companies.map((c) => c.name);
+  }
+  if (field === "stage") {
+    return Object.values(Stage);
+  }
+  if (field === "status") {
+    return Object.values(TaskStatus);
+  }
+  return [];
 }
