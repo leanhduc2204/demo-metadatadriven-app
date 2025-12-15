@@ -39,7 +39,7 @@ export function DataTable<TData, TValue>({
   data,
   hideHeader = false,
   hideBody = false,
-  height = "85vh",
+  height = "87vh",
   children,
   overflow,
   pinnedColumns = ["select", "fullName"],
