@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -8,14 +9,40 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Calendar } from "@/components/ui/calendar";
-import { FILTER_OPERATOR_OPTIONS } from "@/lib/constants";
+import {
+  FILTER_OPERATOR_OPTIONS,
+  RELATIVE_DATE_TYPE_OPTIONS,
+  RELATIVE_DATE_UNIT_OPTIONS,
+} from "@/lib/constants";
 import { FieldType } from "@/lib/field-config";
 import { getAvailableOperators } from "@/lib/filter-operators";
-import { FilterOperator } from "@/types/common";
-import { Check, ChevronDown, ChevronLeft } from "lucide-react";
-import { useMemo, useState, useEffect, useRef } from "react";
-import { format, parse, isValid } from "date-fns";
+import {
+  FilterOperator,
+  RelativeDateType,
+  RelativeDateUnit,
+} from "@/types/common";
+import {
+  format,
+  isValid,
+  parse,
+  startOfDay,
+  subDays,
+  addDays,
+  subMonths,
+  addMonths,
+  subYears,
+  addYears,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  eachDayOfInterval,
+  isSameDay,
+} from "date-fns";
+import { CalendarX2, Check, ChevronDown, ChevronLeft } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface FilterItemProps {
   label: string;
@@ -55,8 +82,31 @@ export function FilterItem({
       selectedOperator === FilterOperator.IS_BEFORE ||
       selectedOperator === FilterOperator.IS_AFTER);
 
+  const isRelativeDateOperator =
+    fieldType === FieldType.DATE &&
+    selectedOperator === FilterOperator.IS_RELATIVE;
+
   // Search state for filtering array field values
   const [searchTerm, setSearchTerm] = useState("");
+  const [relativeDateType, setRelativeDateType] = useState<RelativeDateType>(
+    RelativeDateType.THIS
+  );
+  const [relativeDateUnit, setRelativeDateUnit] = useState<RelativeDateUnit>(
+    RelativeDateUnit.DAY
+  );
+  const [relativeDateValue, setRelativeDateValue] = useState<string>("1");
+
+  // Helper function to get unit label with plural/singular form
+  const getUnitLabel = (unit: RelativeDateUnit, value: string): string => {
+    const baseLabel = RELATIVE_DATE_UNIT_OPTIONS[unit];
+    const numValue = parseInt(value) || 1;
+
+    if (numValue > 1) {
+      // Return plural form
+      return `${baseLabel}s`;
+    }
+    return baseLabel;
+  };
 
   // Date picker state - month for calendar navigation
   const [month, setMonth] = useState<Date>(new Date());
@@ -177,6 +227,105 @@ export function FilterItem({
   const calendarMonth = useMemo(() => {
     return date || month;
   }, [date, month]);
+
+  // Calculate highlighted dates for relative date operator
+  const highlightedDates = useMemo(() => {
+    if (!isRelativeDateOperator) return [];
+
+    const today = startOfDay(new Date());
+    const value = parseInt(relativeDateValue) || 1;
+
+    let startDate: Date;
+    let endDate: Date;
+
+    if (relativeDateType === RelativeDateType.THIS) {
+      // THIS: current period
+      switch (relativeDateUnit) {
+        case RelativeDateUnit.DAY:
+          startDate = today;
+          endDate = today;
+          break;
+        case RelativeDateUnit.WEEK:
+          startDate = startOfWeek(today);
+          endDate = endOfWeek(today);
+          break;
+        case RelativeDateUnit.MONTH:
+          startDate = startOfMonth(today);
+          endDate = endOfMonth(today);
+          break;
+        case RelativeDateUnit.YEAR:
+          startDate = startOfYear(today);
+          endDate = endOfYear(today);
+          break;
+        default:
+          return [];
+      }
+    } else if (relativeDateType === RelativeDateType.PAST) {
+      // PAST: from today going back N units (inclusive of today)
+      // Example: value=1, unit=day -> today and yesterday (2 days)
+      // Example: value=1, unit=week -> from today back 1 week (7 days including today)
+      switch (relativeDateUnit) {
+        case RelativeDateUnit.DAY:
+          endDate = today;
+          startDate = subDays(today, value); // value=1 -> today - 1 day = yesterday
+          break;
+        case RelativeDateUnit.WEEK:
+          endDate = today;
+          startDate = subDays(today, value * 7 - 1); // value=1 -> today - 6 days = 7 days total
+          break;
+        case RelativeDateUnit.MONTH:
+          endDate = today;
+          startDate = subMonths(today, value);
+          // Adjust to start of the month range
+          startDate = startOfMonth(startDate);
+          break;
+        case RelativeDateUnit.YEAR:
+          endDate = today;
+          startDate = subYears(today, value);
+          // Adjust to start of the year range
+          startDate = startOfYear(startDate);
+          break;
+        default:
+          return [];
+      }
+    } else {
+      // NEXT: from today going forward N units (inclusive of today)
+      // Example: value=1, unit=day -> today and tomorrow (2 days)
+      // Example: value=1, unit=week -> from today forward 1 week (7 days including today)
+      switch (relativeDateUnit) {
+        case RelativeDateUnit.DAY:
+          startDate = today;
+          endDate = addDays(today, value); // value=1 -> today + 1 day = tomorrow
+          break;
+        case RelativeDateUnit.WEEK:
+          startDate = today;
+          endDate = addDays(today, value * 7 - 1); // value=1 -> today + 6 days = 7 days total
+          break;
+        case RelativeDateUnit.MONTH:
+          startDate = today;
+          endDate = addMonths(today, value);
+          // Adjust to end of the month range
+          endDate = endOfMonth(endDate);
+          break;
+        case RelativeDateUnit.YEAR:
+          startDate = today;
+          endDate = addYears(today, value);
+          // Adjust to end of the year range
+          endDate = endOfYear(endDate);
+          break;
+        default:
+          return [];
+      }
+    }
+
+    // Generate all dates in the range
+    return eachDayOfInterval({ start: startDate, end: endDate });
+  }, [
+    isRelativeDateOperator,
+    relativeDateType,
+    relativeDateUnit,
+    relativeDateValue,
+  ]);
 
   // Parse selected values from filterValue (comma-separated string)
   const selectedValues = useMemo(() => {
@@ -578,6 +727,160 @@ export function FilterItem({
                 className="[--cell-size:--spacing(9)] md:[--cell-size:--spacing(10)]"
               />
             </div>
+          </>
+        ) : isRelativeDateOperator ? (
+          <>
+            <div className="w-full flex items-center justify-between gap-2 p-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size={"sm"}
+                    className="h-9 flex-2  text-neutral-500 text-xs justify-between rounded-sm"
+                  >
+                    {RELATIVE_DATE_TYPE_OPTIONS[relativeDateType]}
+                    <ChevronDown className="text-neutral-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-40">
+                  {Object.values(RelativeDateType).map((type) => (
+                    <DropdownMenuItem
+                      key={type}
+                      onClick={() => setRelativeDateType(type)}
+                      className="justify-between text-neutral-500 text-xs"
+                    >
+                      <span>{RELATIVE_DATE_TYPE_OPTIONS[type]}</span>
+                      {relativeDateType === type && <Check />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Input
+                type="number"
+                min="1"
+                placeholder="Number"
+                value={
+                  relativeDateType === RelativeDateType.THIS
+                    ? "-"
+                    : relativeDateValue
+                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow empty string for deletion
+                  if (value === "") {
+                    setRelativeDateValue("");
+                    return;
+                  }
+                  // Parse as number
+                  const numValue = parseInt(value, 10);
+                  // Only allow positive integers >= 1
+                  if (!isNaN(numValue) && numValue >= 1) {
+                    setRelativeDateValue(value);
+                  }
+                  // Ignore 0, negative numbers, and non-numeric input
+                }}
+                onKeyDown={(e) => {
+                  // Prevent typing negative sign, plus sign, scientific notation, or decimal point
+                  if (
+                    e.key === "-" ||
+                    e.key === "+" ||
+                    e.key === "e" ||
+                    e.key === "E" ||
+                    e.key === "."
+                  ) {
+                    e.preventDefault();
+                    return;
+                  }
+                  // Prevent typing 0 as the first character (but allow in numbers like 10, 20, etc.)
+                  const input = e.currentTarget;
+                  const selectionStart = input.selectionStart || 0;
+                  const selectionEnd = input.selectionEnd || 0;
+                  const currentValue = input.value;
+
+                  // If typing 0 and it would be the first character (or replacing all text)
+                  if (
+                    e.key === "0" &&
+                    (currentValue === "" ||
+                      (selectionStart === 0 &&
+                        selectionEnd === currentValue.length))
+                  ) {
+                    e.preventDefault();
+                    return;
+                  }
+                }}
+                disabled={relativeDateType === RelativeDateType.THIS}
+                className="flex-1 text-xs"
+              />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size={"sm"}
+                    className="h-9 flex-2 text-neutral-500 text-xs justify-between rounded-sm"
+                  >
+                    {getUnitLabel(relativeDateUnit, relativeDateValue)}
+                    <ChevronDown className="text-neutral-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-40">
+                  {Object.values(RelativeDateUnit).map((unit) => (
+                    <DropdownMenuItem
+                      key={unit}
+                      onClick={() => setRelativeDateUnit(unit)}
+                      className="justify-between text-neutral-500 text-xs"
+                    >
+                      <span>{getUnitLabel(unit, relativeDateValue)}</span>
+                      {relativeDateUnit === unit && <Check />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="p-1">
+              <Calendar
+                mode="single"
+                components={{
+                  PreviousMonthButton: () => <></>,
+                  NextMonthButton: () => <></>,
+                  DayButton: ({ day, className, ...props }) => {
+                    const isHighlighted = highlightedDates.some((d) =>
+                      isSameDay(d, day.date)
+                    );
+                    return (
+                      <Button
+                        {...props}
+                        variant="ghost"
+                        size="icon"
+                        className={`${
+                          isHighlighted
+                            ? "bg-blue-500 text-white flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1"
+                            : ""
+                        } ${className || ""}`}
+                      >
+                        {day.date.getDate()}
+                      </Button>
+                    );
+                  },
+                }}
+                className="w-full [--cell-size:--spacing(9)] md:[--cell-size:--spacing(10)]"
+                disabled
+              />
+            </div>
+            <Separator />
+            <Button
+              variant={"ghost"}
+              size={"sm"}
+              className="w-full justify-start"
+              onClick={() => {
+                setRelativeDateType(RelativeDateType.THIS);
+                setRelativeDateUnit(RelativeDateUnit.DAY);
+                setRelativeDateValue("1");
+              }}
+            >
+              <CalendarX2 /> Clear
+            </Button>
           </>
         ) : (
           <div>

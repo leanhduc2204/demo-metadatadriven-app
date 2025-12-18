@@ -32,7 +32,7 @@ export function FilterItemBadge({ filter, icon, label }: FilterItemBadgeProps) {
           key={filter.id}
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "flex items-center justify-between gap-2 px-2 rounded-sm bg-blue-50 hover:bg-blue-50 text-blue-500 hover:text-blue-500 border-blue-100 cursor-pointer"
+            "flex items-center justify-between gap-2 px-2 rounded-sm bg-blue-50 hover:bg-blue-50 text-xs text-blue-500 hover:text-blue-500 border-blue-100 cursor-pointer"
           )}
         >
           <div className="flex items-center gap-1">

@@ -1,4 +1,10 @@
-import { FilterOperator, SortBy, SortOrder } from "@/types/common";
+import {
+  FilterOperator,
+  RelativeDateType,
+  RelativeDateUnit,
+  SortBy,
+  SortOrder,
+} from "@/types/common";
 
 export const SORT_BY_OPTIONS = {
   [SortBy.ASC]: "Ascending",
@@ -61,4 +67,17 @@ export const FILTER_OPERATOR_OPTIONS = {
   [FilterOperator.IS_AFTER]: "Is after",
   [FilterOperator.IS_EMPTY]: "Is empty",
   [FilterOperator.IS_NOT_EMPTY]: "Is not empty",
+} as const;
+
+export const RELATIVE_DATE_TYPE_OPTIONS = {
+  [RelativeDateType.PAST]: "Past",
+  [RelativeDateType.THIS]: "This",
+  [RelativeDateType.NEXT]: "Next",
+} as const;
+
+export const RELATIVE_DATE_UNIT_OPTIONS = {
+  [RelativeDateUnit.DAY]: "Day",
+  [RelativeDateUnit.WEEK]: "Week",
+  [RelativeDateUnit.MONTH]: "Month",
+  [RelativeDateUnit.YEAR]: "Year",
 } as const;

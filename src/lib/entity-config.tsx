@@ -304,6 +304,7 @@ export const peopleConfig: EntityConfig<User> = {
     "phones",
     "city",
     "jobTitle",
+    "creationDate",
   ],
   pinnedColumns: [COLUMN_IDS.SELECT, "fullName"],
   primaryField: "fullName",

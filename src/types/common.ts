@@ -57,3 +57,16 @@ export enum OpenInMode {
   SIDE_PANEL = "side_panel",
   RECORD_PAGE = "record_page",
 }
+
+export enum RelativeDateType {
+  PAST = "past",
+  THIS = "this",
+  NEXT = "next",
+}
+
+export enum RelativeDateUnit {
+  DAY = "day",
+  WEEK = "week",
+  MONTH = "month",
+  YEAR = "year",
+}
