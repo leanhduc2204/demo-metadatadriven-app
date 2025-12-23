@@ -29,6 +29,7 @@ import {
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EventCard } from "./event-card";
+import { Skeleton } from "./ui/skeleton";
 
 interface EventCalendarProps<T> {
   data: T[];
@@ -39,6 +40,8 @@ interface EventCalendarProps<T> {
   config: EntityConfig<T>;
   compactView?: boolean;
   calendarViewType?: CalendarViewType;
+  isLoading?: boolean;
+  skeletonEventCount?: number;
 }
 
 export function EventCalendar<T extends { id: number }>({
@@ -50,6 +53,8 @@ export function EventCalendar<T extends { id: number }>({
   config,
   compactView = false,
   calendarViewType = CalendarViewType.MONTH,
+  isLoading = false,
+  skeletonEventCount = 3,
 }: EventCalendarProps<T>) {
   const [date, setDate] = useState<Date>(new Date());
   const [month, setMonth] = useState<Date>(date);
@@ -232,22 +237,35 @@ export function EventCalendar<T extends { id: number }>({
 
               {/* Events List */}
               <div className="flex flex-col gap-1">
-                {dayEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    item={event}
-                    primaryField={primaryField}
-                    visibleFields={visibleFields}
-                    fieldConfig={fieldConfig}
-                    config={config}
-                    context="calendar"
-                    compact={compactView}
-                    selected={selectedIds.has(event.id)}
-                    onSelectChange={(selected) =>
-                      toggleSelection(event.id, selected)
-                    }
-                  />
-                ))}
+                {isLoading
+                  ? // Skeleton events
+                    Array.from({ length: skeletonEventCount }).map(
+                      (_, index) => (
+                        <div
+                          key={`skeleton-event-${day.toString()}-${index}`}
+                          className="bg-white border rounded-sm p-1.5 shadow-sm"
+                        >
+                          <Skeleton className="h-4 w-full mb-1" />
+                          {!compactView && <Skeleton className="h-3 w-3/4" />}
+                        </div>
+                      )
+                    )
+                  : dayEvents.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        item={event}
+                        primaryField={primaryField}
+                        visibleFields={visibleFields}
+                        fieldConfig={fieldConfig}
+                        config={config}
+                        context="calendar"
+                        compact={compactView}
+                        selected={selectedIds.has(event.id)}
+                        onSelectChange={(selected) =>
+                          toggleSelection(event.id, selected)
+                        }
+                      />
+                    ))}
               </div>
             </div>
           );
@@ -297,22 +315,35 @@ export function EventCalendar<T extends { id: number }>({
               )}
             >
               <div className="flex flex-col gap-1">
-                {dayEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    item={event}
-                    primaryField={primaryField}
-                    visibleFields={visibleFields}
-                    fieldConfig={fieldConfig}
-                    config={config}
-                    context="calendar"
-                    compact={compactView}
-                    selected={selectedIds.has(event.id)}
-                    onSelectChange={(selected) =>
-                      toggleSelection(event.id, selected)
-                    }
-                  />
-                ))}
+                {isLoading
+                  ? // Skeleton events
+                    Array.from({ length: skeletonEventCount }).map(
+                      (_, index) => (
+                        <div
+                          key={`skeleton-event-${day.toString()}-${index}`}
+                          className="bg-white border rounded-sm p-1.5 shadow-sm"
+                        >
+                          <Skeleton className="h-4 w-full mb-1" />
+                          {!compactView && <Skeleton className="h-3 w-3/4" />}
+                        </div>
+                      )
+                    )
+                  : dayEvents.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        item={event}
+                        primaryField={primaryField}
+                        visibleFields={visibleFields}
+                        fieldConfig={fieldConfig}
+                        config={config}
+                        context="calendar"
+                        compact={compactView}
+                        selected={selectedIds.has(event.id)}
+                        onSelectChange={(selected) =>
+                          toggleSelection(event.id, selected)
+                        }
+                      />
+                    ))}
               </div>
             </div>
           );
@@ -356,7 +387,33 @@ export function EventCalendar<T extends { id: number }>({
 
         {/* Timeline Rows */}
         <div className="flex-1 overflow-y-auto">
-          {monthEvents.length === 0 ? (
+          {isLoading ? (
+            // Skeleton timeline rows
+            Array.from({ length: skeletonEventCount }).map((_, index) => (
+              <div
+                key={`skeleton-timeline-${index}`}
+                className="flex border-b hover:bg-muted/20"
+              >
+                <div className="w-48 shrink-0 p-2 border-r">
+                  <div className="bg-white border rounded-sm p-1.5 shadow-sm">
+                    <Skeleton className="h-4 w-full mb-1" />
+                    {!compactView && <Skeleton className="h-3 w-3/4" />}
+                  </div>
+                </div>
+                <div className="flex flex-1">
+                  {days.map((day) => (
+                    <div
+                      key={day.toString()}
+                      className={cn(
+                        "w-10 shrink-0 border-r relative",
+                        isSameDay(day, new Date()) && "bg-primary/5"
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : monthEvents.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               No events this month
             </div>

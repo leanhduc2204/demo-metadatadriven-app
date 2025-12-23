@@ -19,6 +19,7 @@ import { useMemo, useRef, useState, useEffect } from "react";
 
 import { DefaultCell } from "./default-cell";
 import { DefaultHeader } from "./default-header";
+import { Skeleton } from "./ui/skeleton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,6 +33,8 @@ interface DataTableProps<TData, TValue> {
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   getRowId?: (originalRow: TData, index: number, parent?: Row<TData>) => string;
+  isLoading?: boolean;
+  skeletonRowCount?: number;
 }
 
 export function DataTable<TData, TValue>({
@@ -46,6 +49,8 @@ export function DataTable<TData, TValue>({
   rowSelection: controlledRowSelection,
   onRowSelectionChange: setControlledRowSelection,
   getRowId,
+  isLoading = false,
+  skeletonRowCount = 10,
 }: DataTableProps<TData, TValue>) {
   const [internalRowSelection, setInternalRowSelection] =
     useState<RowSelectionState>({});
@@ -91,8 +96,9 @@ export function DataTable<TData, TValue>({
   }, [columnSizing]);
 
   const { rows } = table.getRowModel();
+  const rowCount = isLoading ? skeletonRowCount : rows.length;
   const rowVirtualizer = useVirtualizer({
-    count: rows.length,
+    count: rowCount,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 35, // estimate row height
     overscan: 10,
@@ -136,6 +142,48 @@ export function DataTable<TData, TValue>({
         >
           {!hideBody &&
             virtualRows.map((virtualItem) => {
+              if (isLoading) {
+                const headerGroup = table.getHeaderGroups()[0];
+                return (
+                  <TableRow
+                    key={virtualItem.key}
+                    className="absolute top-0 left-0 flex w-full"
+                    style={{
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                  >
+                    {headerGroup.headers.map((header) => {
+                      const isPinned = header.column.getIsPinned();
+                      return (
+                        <td
+                          key={header.id}
+                          className={`p-1 px-2 ${
+                            header.id !== "select" && header.id !== "add-column"
+                              ? "border-r"
+                              : ""
+                          } ${
+                            isPinned
+                              ? "flex items-center sticky z-10 bg-background shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r-2 border-r-border border-b border-border"
+                              : ""
+                          } ${header.id === "select" ? "border-r-0" : ""}`}
+                          style={{
+                            width: header.column.getSize(),
+                            flex: `0 0 ${header.column.getSize()}px`,
+                            left:
+                              isPinned === "left"
+                                ? `${header.column.getStart("left")}px`
+                                : undefined,
+                          }}
+                        >
+                          <Skeleton className="h-4 w-full" />
+                        </td>
+                      );
+                    })}
+                  </TableRow>
+                );
+              }
+
               const row = rows[virtualItem.index];
               return (
                 <TableRow

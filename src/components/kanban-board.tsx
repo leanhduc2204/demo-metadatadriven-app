@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import { EventCard } from "./event-card";
 import { Badge } from "./ui/badge";
+import { Skeleton } from "./ui/skeleton";
 
 interface KanbanBoardProps<T> {
   data: T[];
@@ -16,6 +17,8 @@ interface KanbanBoardProps<T> {
   fieldConfig: Record<string, FieldConfigItem>;
   config: EntityConfig<T>;
   compactView?: boolean;
+  isLoading?: boolean;
+  skeletonCardCount?: number;
 }
 
 export function KanbanBoard<T extends { id: number }>({
@@ -27,6 +30,8 @@ export function KanbanBoard<T extends { id: number }>({
   fieldConfig,
   config,
   compactView = false,
+  isLoading = false,
+  skeletonCardCount = 5,
 }: KanbanBoardProps<T>) {
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -79,96 +84,140 @@ export function KanbanBoard<T extends { id: number }>({
         <div className="inline-flex flex-col min-w-full">
           {/* Sticky Header Row - scrolls horizontally with body */}
           <div className="flex border-b bg-white sticky top-0 z-10">
-            {groups.map((group) => {
-              const items = groupedData[group] || [];
-              // Count selected items in this group
-              const selectedCount = items.filter((item) =>
-                selectedIds.has(item.id)
-              ).length;
-
-              return (
-                <div
-                  key={group}
-                  className="w-[280px] min-w-[280px] max-w-[350px] shrink-0 px-3 py-3 border-r last:border-r-0"
-                >
-                  <div className="flex items-center">
-                    <Badge
-                      variant={"secondary"}
-                      className={`${
-                        (config.groupColorMap && config.groupColorMap[group]) ||
-                        "bg-neutral-100 text-neutral-700"
-                      } rounded-md px-2 py-0.5 mr-2`}
-                    >
-                      <span className="font-medium text-sm text-nowrap">
-                        {group}
-                      </span>
-                    </Badge>
-                    <div className="flex items-center gap-1.5">
-                      {selectedCount > 0 && (
-                        <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                          {selectedCount} selected
-                        </span>
-                      )}
-                      <span className="text-xs text-neutral-500">
-                        {items.length}
-                      </span>
+            {isLoading
+              ? // Skeleton headers
+                Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={`skeleton-header-${index}`}
+                    className="w-[280px] min-w-[280px] max-w-[350px] shrink-0 px-3 py-3 border-r last:border-r-0"
+                  >
+                    <div className="flex items-center">
+                      <Skeleton className="h-6 w-20 mr-2" />
+                      <Skeleton className="h-4 w-8" />
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                ))
+              : groups.map((group) => {
+                  const items = groupedData[group] || [];
+                  // Count selected items in this group
+                  const selectedCount = items.filter((item) =>
+                    selectedIds.has(item.id)
+                  ).length;
+
+                  return (
+                    <div
+                      key={group}
+                      className="w-[280px] min-w-[280px] max-w-[350px] shrink-0 px-3 py-3 border-r last:border-r-0"
+                    >
+                      <div className="flex items-center">
+                        <Badge
+                          variant={"secondary"}
+                          className={`${
+                            (config.groupColorMap &&
+                              config.groupColorMap[group]) ||
+                            "bg-neutral-100 text-neutral-700"
+                          } rounded-md px-2 py-0.5 mr-2`}
+                        >
+                          <span className="font-medium text-sm text-nowrap">
+                            {group}
+                          </span>
+                        </Badge>
+                        <div className="flex items-center gap-1.5">
+                          {selectedCount > 0 && (
+                            <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                              {selectedCount} selected
+                            </span>
+                          )}
+                          <span className="text-xs text-neutral-500">
+                            {items.length}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
           </div>
 
           {/* Body - columns */}
           <div className="flex min-h-full">
-            {groups.map((group) => {
-              const items = groupedData[group] || [];
-
-              return (
-                <div
-                  key={group}
-                  className={cn(
-                    "w-[280px] min-w-[280px] max-w-[350px] shrink-0 border-r last:border-r-0 bg-neutral-50/50",
-                    "flex flex-col"
-                  )}
-                >
-                  {/* Cards Container */}
-                  <div className="p-2 space-y-2 flex-1">
-                    {items.length === 0 ? (
-                      <div className="text-center text-neutral-400 text-sm py-8">
-                        No items
-                      </div>
-                    ) : (
-                      items.map((item) => (
-                        <EventCard
-                          key={item.id}
-                          item={item}
-                          primaryField={primaryField}
-                          visibleFields={visibleFields}
-                          fieldConfig={fieldConfig}
-                          config={config}
-                          context="kanban"
-                          compact={compactView}
-                          selected={selectedIds.has(item.id)}
-                          onSelectChange={(selected) =>
-                            toggleSelection(item.id, selected)
-                          }
-                        />
-                      ))
+            {isLoading
+              ? // Skeleton columns
+                Array.from({ length: 3 }).map((_, colIndex) => (
+                  <div
+                    key={`skeleton-column-${colIndex}`}
+                    className={cn(
+                      "w-[280px] min-w-[280px] max-w-[350px] shrink-0 border-r last:border-r-0 bg-neutral-50/50",
+                      "flex flex-col"
                     )}
-
-                    {/* Spacer to ensure all columns have same min height */}
-                    {items.length < maxItems && (
-                      <div
-                        style={{
-                          minHeight: `${(maxItems - items.length) * 60}px`,
-                        }}
-                      />
-                    )}
+                  >
+                    <div className="p-2 space-y-2 flex-1">
+                      {Array.from({ length: skeletonCardCount }).map(
+                        (_, cardIndex) => (
+                          <div
+                            key={`skeleton-card-${colIndex}-${cardIndex}`}
+                            className="bg-white border rounded-sm p-1.5 shadow-sm"
+                          >
+                            <Skeleton className="h-4 w-full mb-2" />
+                            {!compactView && (
+                              <>
+                                <Skeleton className="h-3 w-3/4 mb-1.5" />
+                                <Skeleton className="h-3 w-2/3" />
+                              </>
+                            )}
+                          </div>
+                        )
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                ))
+              : groups.map((group) => {
+                  const items = groupedData[group] || [];
+
+                  return (
+                    <div
+                      key={group}
+                      className={cn(
+                        "w-[280px] min-w-[280px] max-w-[350px] shrink-0 border-r last:border-r-0 bg-neutral-50/50",
+                        "flex flex-col"
+                      )}
+                    >
+                      {/* Cards Container */}
+                      <div className="p-2 space-y-2 flex-1">
+                        {items.length === 0 ? (
+                          <div className="text-center text-neutral-400 text-sm py-8">
+                            No items
+                          </div>
+                        ) : (
+                          items.map((item) => (
+                            <EventCard
+                              key={item.id}
+                              item={item}
+                              primaryField={primaryField}
+                              visibleFields={visibleFields}
+                              fieldConfig={fieldConfig}
+                              config={config}
+                              context="kanban"
+                              compact={compactView}
+                              selected={selectedIds.has(item.id)}
+                              onSelectChange={(selected) =>
+                                toggleSelection(item.id, selected)
+                              }
+                            />
+                          ))
+                        )}
+
+                        {/* Spacer to ensure all columns have same min height */}
+                        {items.length < maxItems && (
+                          <div
+                            style={{
+                              minHeight: `${(maxItems - items.length) * 60}px`,
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
           </div>
         </div>
       </div>
