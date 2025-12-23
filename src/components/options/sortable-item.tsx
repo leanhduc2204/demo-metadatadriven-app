@@ -27,7 +27,7 @@ export function SortableItem({
   } = useSortable({ id, disabled: isLocked });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: isLocked ? undefined : CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 1 : 0,
     position: "relative" as const,

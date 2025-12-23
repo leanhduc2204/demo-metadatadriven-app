@@ -49,9 +49,63 @@ export function FieldsView({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = visibleFields.indexOf(active.id as string);
-      const newIndex = visibleFields.indexOf(over.id as string);
-      onReorderFields(arrayMove(visibleFields, oldIndex, newIndex));
+      const activeId = active.id as string;
+      const targetId = over.id as string;
+
+      // Kiểm tra xem item đang được drag có bị lock không
+      if (lockedColumns.includes(activeId)) {
+        // Không cho phép drag item bị lock
+        return;
+      }
+
+      // Kiểm tra xem item đích có bị lock không
+      if (lockedColumns.includes(targetId)) {
+        // Không cho phép di chuyển item vào vị trí của item bị lock
+        return;
+      }
+
+      // Tách các item không bị lock và item bị lock
+      const unlockedFields: string[] = [];
+      const lockedFields: string[] = [];
+      const lockedIndices: number[] = [];
+
+      visibleFields.forEach((field, index) => {
+        if (lockedColumns.includes(field)) {
+          lockedFields.push(field);
+          lockedIndices.push(index);
+        } else {
+          unlockedFields.push(field);
+        }
+      });
+
+      // Di chuyển item trong danh sách không bị lock
+      const oldUnlockedIndex = unlockedFields.indexOf(activeId);
+      const targetUnlockedIndex = unlockedFields.indexOf(targetId);
+
+      if (oldUnlockedIndex !== -1 && targetUnlockedIndex !== -1) {
+        const reorderedUnlocked = arrayMove(
+          unlockedFields,
+          oldUnlockedIndex,
+          targetUnlockedIndex
+        );
+
+        // Chèn lại các item bị lock vào vị trí ban đầu
+        const result: string[] = [];
+        let unlockedIdx = 0;
+        let lockedIdx = 0;
+
+        for (let i = 0; i < visibleFields.length; i++) {
+          if (lockedIndices.includes(i)) {
+            result.push(lockedFields[lockedIdx]);
+            lockedIdx++;
+          } else {
+            result.push(reorderedUnlocked[unlockedIdx]);
+            unlockedIdx++;
+          }
+        }
+
+        onReorderFields(result);
+      }
     }
   };
 
