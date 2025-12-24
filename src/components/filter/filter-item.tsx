@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -102,10 +103,102 @@ export function FilterItem({
     const numValue = parseInt(value) || 1;
 
     if (numValue > 1) {
-      // Return plural form
       return `${baseLabel}s`;
     }
     return baseLabel;
+  };
+
+  // Format relative date to string: "This day", "Past 1 day", "Past 2 days", "Next 1 week", etc.
+  const formatRelativeDateString = (
+    type: RelativeDateType,
+    unit: RelativeDateUnit,
+    value: string
+  ): string => {
+    const typeLabel = RELATIVE_DATE_TYPE_OPTIONS[type];
+    const unitLabel = getUnitLabel(unit, value);
+
+    if (type === RelativeDateType.THIS) {
+      return `${typeLabel} ${unitLabel.toLowerCase()}`;
+    }
+
+    const numValue = parseInt(value) || 1;
+    return `${typeLabel} ${numValue} ${unitLabel.toLowerCase()}`;
+  };
+
+  // Parse relative date string: "This day", "Past 1 day", "Next 2 weeks", etc.
+  const parseRelativeDateString = (
+    value: string
+  ): {
+    type: RelativeDateType;
+    unit: RelativeDateUnit;
+    value: string;
+  } | null => {
+    if (!value || !value.trim()) return null;
+
+    const lowerValue = value.toLowerCase().trim();
+
+    // Check for "This" type
+    if (lowerValue.startsWith("this")) {
+      const unitStr = lowerValue.replace("this", "").trim();
+      for (const [unit, label] of Object.entries(RELATIVE_DATE_UNIT_OPTIONS)) {
+        if (
+          unitStr === label.toLowerCase() ||
+          unitStr === `${label.toLowerCase()}s`
+        ) {
+          return {
+            type: RelativeDateType.THIS,
+            unit: unit as RelativeDateUnit,
+            value: "1",
+          };
+        }
+      }
+    }
+
+    // Check for "Past" or "Next" type
+    const pastMatch = lowerValue.match(
+      /^past\s+(\d+)\s+(day|week|month|year)s?$/
+    );
+    const nextMatch = lowerValue.match(
+      /^next\s+(\d+)\s+(day|week|month|year)s?$/
+    );
+
+    if (pastMatch) {
+      const [, numStr, unitStr] = pastMatch;
+      const unitMap: Record<string, RelativeDateUnit> = {
+        day: RelativeDateUnit.DAY,
+        week: RelativeDateUnit.WEEK,
+        month: RelativeDateUnit.MONTH,
+        year: RelativeDateUnit.YEAR,
+      };
+      const unit = unitMap[unitStr];
+      if (unit) {
+        return {
+          type: RelativeDateType.PAST,
+          unit,
+          value: numStr,
+        };
+      }
+    }
+
+    if (nextMatch) {
+      const [, numStr, unitStr] = nextMatch;
+      const unitMap: Record<string, RelativeDateUnit> = {
+        day: RelativeDateUnit.DAY,
+        week: RelativeDateUnit.WEEK,
+        month: RelativeDateUnit.MONTH,
+        year: RelativeDateUnit.YEAR,
+      };
+      const unit = unitMap[unitStr];
+      if (unit) {
+        return {
+          type: RelativeDateType.NEXT,
+          unit,
+          value: numStr,
+        };
+      }
+    }
+
+    return null;
   };
 
   // Date picker state - month for calendar navigation
@@ -114,23 +207,22 @@ export function FilterItem({
   // Ref for input to control cursor position
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Ref to track if filterValue update is from internal state change
+  const isInternalUpdateRef = useRef(false);
+
   // Derive date from filterValue using useMemo instead of useEffect
   const date = useMemo(() => {
     if (isDateFieldWithDateOperator && filterValue) {
       try {
-        // Try to parse dd/mm/yyyy HH:mm format
         const parsed = parse(filterValue, "dd/MM/yyyy HH:mm", new Date());
         if (isValid(parsed)) {
           return parsed;
         }
-        // Try to parse dd/mm/yyyy format
         const parsedDate = parse(filterValue, "dd/MM/yyyy", new Date());
         if (isValid(parsedDate)) {
           return parsedDate;
         }
-      } catch {
-        // Invalid format
-      }
+      } catch {}
     }
     return undefined;
   }, [filterValue, isDateFieldWithDateOperator]);
@@ -142,8 +234,69 @@ export function FilterItem({
       const defaultValue = format(now, "dd/MM/yyyy HH:mm");
       onFilterValueChange(defaultValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDateFieldWithDateOperator, filterValue]);
+
+  // Parse filterValue to relative date states when component mounts or filterValue changes from outside
+  useEffect(() => {
+    if (isRelativeDateOperator) {
+      // Skip parsing if the update is from internal state change
+      if (isInternalUpdateRef.current) {
+        isInternalUpdateRef.current = false;
+        return;
+      }
+
+      if (filterValue) {
+        const parsed = parseRelativeDateString(filterValue);
+        if (parsed) {
+          // Check if parsed values are different from current state to avoid unnecessary updates
+          if (
+            parsed.type !== relativeDateType ||
+            parsed.unit !== relativeDateUnit ||
+            parsed.value !== relativeDateValue
+          ) {
+            setRelativeDateType(parsed.type);
+            setRelativeDateUnit(parsed.unit);
+            setRelativeDateValue(parsed.value);
+          }
+        }
+      } else {
+        // Set default values when filterValue is empty
+        const defaultType = RelativeDateType.THIS;
+        const defaultUnit = RelativeDateUnit.DAY;
+        const defaultValue = "1";
+        if (
+          relativeDateType !== defaultType ||
+          relativeDateUnit !== defaultUnit ||
+          relativeDateValue !== defaultValue
+        ) {
+          setRelativeDateType(defaultType);
+          setRelativeDateUnit(defaultUnit);
+          setRelativeDateValue(defaultValue);
+        }
+      }
+    }
+  }, [isRelativeDateOperator, filterValue]);
+
+  // Save relative date to filterValue when states change
+  useEffect(() => {
+    if (isRelativeDateOperator) {
+      const formatted = formatRelativeDateString(
+        relativeDateType,
+        relativeDateUnit,
+        relativeDateValue
+      );
+      // Only update if the formatted value is different from current filterValue
+      if (formatted !== filterValue) {
+        isInternalUpdateRef.current = true;
+        onFilterValueChange(formatted);
+      }
+    }
+  }, [
+    isRelativeDateOperator,
+    relativeDateType,
+    relativeDateUnit,
+    relativeDateValue,
+  ]);
 
   // Format input with mask: __/__/____ __:__
   const formatWithMask = (digits: string): string => {
@@ -172,7 +325,6 @@ export function FilterItem({
     const digits = maskedValue.replace(/\D/g, "");
     if (digits.length === 0) return null;
 
-    // Need at least 8 digits for dd/MM/yyyy
     if (digits.length < 8) return null;
 
     const day = digits.slice(0, 2);
@@ -194,24 +346,20 @@ export function FilterItem({
     if (!isDateFieldWithDateOperator) return "";
 
     if (filterValue) {
-      // If filterValue contains _, it's already in mask format
       if (filterValue.includes("_")) {
         return filterValue;
       }
 
       try {
-        // Try to parse as dd/MM/yyyy HH:mm
         const parsed = parse(filterValue, "dd/MM/yyyy HH:mm", new Date());
         if (isValid(parsed)) {
           return format(parsed, "dd/MM/yyyy HH:mm");
         }
-        // Try to parse as dd/MM/yyyy
         const parsedDate = parse(filterValue, "dd/MM/yyyy", new Date());
         if (isValid(parsedDate)) {
           return format(parsedDate, "dd/MM/yyyy HH:mm");
         }
       } catch {
-        // Invalid format, extract digits and format with mask
         const digits = filterValue.replace(/\D/g, "");
         if (digits.length > 0) {
           return formatWithMask(digits);
@@ -219,7 +367,6 @@ export function FilterItem({
       }
     }
 
-    // If no filterValue, show mask
     return "__/__/____ __:__";
   }, [filterValue, isDateFieldWithDateOperator]);
 
@@ -239,7 +386,6 @@ export function FilterItem({
     let endDate: Date;
 
     if (relativeDateType === RelativeDateType.THIS) {
-      // THIS: current period
       switch (relativeDateUnit) {
         case RelativeDateUnit.DAY:
           startDate = today;
@@ -261,56 +407,46 @@ export function FilterItem({
           return [];
       }
     } else if (relativeDateType === RelativeDateType.PAST) {
-      // PAST: from today going back N units (inclusive of today)
-      // Example: value=1, unit=day -> today and yesterday (2 days)
-      // Example: value=1, unit=week -> from today back 1 week (7 days including today)
       switch (relativeDateUnit) {
         case RelativeDateUnit.DAY:
           endDate = today;
-          startDate = subDays(today, value); // value=1 -> today - 1 day = yesterday
+          startDate = subDays(today, value);
           break;
         case RelativeDateUnit.WEEK:
           endDate = today;
-          startDate = subDays(today, value * 7 - 1); // value=1 -> today - 6 days = 7 days total
+          startDate = subDays(today, value * 7 - 1);
           break;
         case RelativeDateUnit.MONTH:
           endDate = today;
           startDate = subMonths(today, value);
-          // Adjust to start of the month range
           startDate = startOfMonth(startDate);
           break;
         case RelativeDateUnit.YEAR:
           endDate = today;
           startDate = subYears(today, value);
-          // Adjust to start of the year range
           startDate = startOfYear(startDate);
           break;
         default:
           return [];
       }
     } else {
-      // NEXT: from today going forward N units (inclusive of today)
-      // Example: value=1, unit=day -> today and tomorrow (2 days)
-      // Example: value=1, unit=week -> from today forward 1 week (7 days including today)
       switch (relativeDateUnit) {
         case RelativeDateUnit.DAY:
           startDate = today;
-          endDate = addDays(today, value); // value=1 -> today + 1 day = tomorrow
+          endDate = addDays(today, value);
           break;
         case RelativeDateUnit.WEEK:
           startDate = today;
-          endDate = addDays(today, value * 7 - 1); // value=1 -> today + 6 days = 7 days total
+          endDate = addDays(today, value * 7 - 1);
           break;
         case RelativeDateUnit.MONTH:
           startDate = today;
           endDate = addMonths(today, value);
-          // Adjust to end of the month range
           endDate = endOfMonth(endDate);
           break;
         case RelativeDateUnit.YEAR:
           startDate = today;
           endDate = addYears(today, value);
-          // Adjust to end of the year range
           endDate = endOfYear(endDate);
           break;
         default:
@@ -318,7 +454,6 @@ export function FilterItem({
       }
     }
 
-    // Generate all dates in the range
     return eachDayOfInterval({ start: startDate, end: endDate });
   }, [
     isRelativeDateOperator,
@@ -360,7 +495,6 @@ export function FilterItem({
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
       setMonth(selectedDate);
-      // Preserve time from current input, or use current time if no time exists
       let timeStr = format(new Date(), "HH:mm");
       if (timeInputValue) {
         const timeMatch = timeInputValue.match(/(\d{2}:\d{2})$/);
@@ -379,11 +513,9 @@ export function FilterItem({
 
     let validated = "";
 
-    // Day (first 2 digits) - max 31
     if (digits.length >= 1) {
       const day1 = parseInt(digits[0]);
       if (day1 > 3) {
-        // First digit of day can't be > 3, don't add it
         return validated;
       }
       validated += digits[0];
@@ -391,18 +523,15 @@ export function FilterItem({
     if (digits.length >= 2) {
       const day = parseInt(digits.slice(0, 2));
       if (day > 31) {
-        // Day can't be > 31, cap at 31
         validated = "31";
       } else {
         validated = digits.slice(0, 2);
       }
     }
 
-    // Month (next 2 digits) - max 12
     if (digits.length >= 3) {
       const month1 = parseInt(digits[2]);
       if (month1 > 1) {
-        // First digit of month can't be > 1, don't add it
         return validated;
       }
       validated += digits[2];
@@ -410,23 +539,19 @@ export function FilterItem({
     if (digits.length >= 4) {
       const month = parseInt(digits.slice(2, 4));
       if (month > 12 || month === 0) {
-        // Month can't be > 12 or 0, cap at 12
         validated = validated.slice(0, 2) + "12";
       } else {
         validated = digits.slice(0, 4);
       }
     }
 
-    // Year (next 4 digits) - no validation needed, just take first 4
     if (digits.length >= 5) {
       validated = digits.slice(0, Math.min(8, digits.length));
     }
 
-    // Hour (next 2 digits) - max 23
     if (digits.length >= 9) {
       const hour1 = parseInt(digits[8]);
       if (hour1 > 2) {
-        // First digit of hour can't be > 2, don't add it
         return validated;
       }
       validated += digits[8];
@@ -434,18 +559,15 @@ export function FilterItem({
     if (digits.length >= 10) {
       const hour = parseInt(digits.slice(8, 10));
       if (hour > 23) {
-        // Hour can't be > 23, cap at 23
         validated = validated.slice(0, 8) + "23";
       } else {
         validated = digits.slice(0, 10);
       }
     }
 
-    // Minute (next 2 digits) - max 59
     if (digits.length >= 11) {
       const minute1 = parseInt(digits[10]);
       if (minute1 > 5) {
-        // First digit of minute can't be > 5, don't add it
         return validated;
       }
       validated += digits[10];
@@ -453,7 +575,6 @@ export function FilterItem({
     if (digits.length >= 12) {
       const minute = parseInt(digits.slice(10, 12));
       if (minute > 59) {
-        // Minute can't be > 59, cap at 59
         validated = validated.slice(0, 10) + "59";
       } else {
         validated = digits.slice(0, 12);
@@ -471,7 +592,6 @@ export function FilterItem({
     isDeleting: boolean
   ): number => {
     if (isDeleting) {
-      // When deleting, keep cursor at same relative position (logic already correct)
       let digitsBeforeCursor = 0;
       for (let i = 0; i < oldCursorPos && i < oldValue.length; i++) {
         if (/\d/.test(oldValue[i])) {
@@ -479,7 +599,6 @@ export function FilterItem({
         }
       }
 
-      // Find position in new value where we have the same number of digits
       let newPos = 0;
       let digitsCount = 0;
       for (let i = 0; i < newValue.length; i++) {
@@ -496,8 +615,6 @@ export function FilterItem({
 
       return newPos;
     } else {
-      // When typing, move cursor to next position after the newly typed digit
-      // Count digits before cursor in old value
       let digitsBeforeCursor = 0;
       for (let i = 0; i < oldCursorPos && i < oldValue.length; i++) {
         if (/\d/.test(oldValue[i])) {
@@ -505,19 +622,15 @@ export function FilterItem({
         }
       }
 
-      // Target is one more digit than before (the newly typed digit)
       const targetDigits = digitsBeforeCursor + 1;
 
-      // Find position in new value where we have the target number of digits
       let newPos = 0;
       let digitsCount = 0;
       for (let i = 0; i < newValue.length; i++) {
         if (/\d/.test(newValue[i])) {
           digitsCount++;
           if (digitsCount === targetDigits) {
-            // Found the target digit, position cursor after it
             newPos = i + 1;
-            // If next char is separator, skip it
             if (
               i + 1 < newValue.length &&
               !/\d/.test(newValue[i + 1]) &&
@@ -528,12 +641,10 @@ export function FilterItem({
             break;
           }
         } else if (digitsCount < targetDigits) {
-          // Haven't reached target yet, keep moving forward
           newPos = i + 1;
         }
       }
 
-      // If we didn't find the exact position, find next _ position
       if (digitsCount < targetDigits) {
         for (let i = 0; i < newValue.length; i++) {
           if (newValue[i] === "_") {
@@ -541,7 +652,6 @@ export function FilterItem({
             break;
           }
         }
-        // If no _ found, put at end
         if (newPos === 0 && digitsCount > 0) {
           newPos = newValue.length;
         }
@@ -557,25 +667,19 @@ export function FilterItem({
     const cursorPosition = e.target.selectionStart || 0;
     const oldValue = timeInputValue;
 
-    // Extract only digits from input
     let digits = value.replace(/\D/g, "");
 
-    // Validate date/time parts
     digits = validateDateParts(digits);
 
-    // Determine if user is deleting (value is shorter or same length but cursor moved back)
     const oldDigits = oldValue.replace(/\D/g, "");
     const isDeleting =
       digits.length < oldDigits.length ||
       (digits.length === oldDigits.length && value.length <= oldValue.length);
 
-    // Format with mask (will show _ for missing digits)
     const processedValue = formatWithMask(digits);
 
-    // Update filterValue with masked value
     onFilterValueChange(processedValue);
 
-    // Calculate and set new cursor position
     setTimeout(() => {
       if (inputRef.current) {
         const newCursorPos = calculateNewCursorPosition(
@@ -588,16 +692,13 @@ export function FilterItem({
       }
     }, 0);
 
-    // Try to parse the input and update calendar if valid
     try {
       const parsedValue = parseMaskedValue(processedValue);
       if (parsedValue) {
-        // Try dd/mm/yyyy HH:mm format
         const parsed = parse(parsedValue, "dd/MM/yyyy HH:mm", new Date());
         if (isValid(parsed)) {
           setMonth(parsed);
         } else {
-          // Try dd/mm/yyyy format (without time)
           const dateOnly = parsedValue.split(" ")[0];
           if (dateOnly) {
             const parsedDate = parse(dateOnly, "dd/MM/yyyy", new Date());
@@ -607,9 +708,7 @@ export function FilterItem({
           }
         }
       }
-    } catch {
-      // Invalid format, calendar will not update but input still works
-    }
+    } catch {}
   };
 
   return (
@@ -767,21 +866,16 @@ export function FilterItem({
                 }
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Allow empty string for deletion
                   if (value === "") {
                     setRelativeDateValue("");
                     return;
                   }
-                  // Parse as number
                   const numValue = parseInt(value, 10);
-                  // Only allow positive integers >= 1
                   if (!isNaN(numValue) && numValue >= 1) {
                     setRelativeDateValue(value);
                   }
-                  // Ignore 0, negative numbers, and non-numeric input
                 }}
                 onKeyDown={(e) => {
-                  // Prevent typing negative sign, plus sign, scientific notation, or decimal point
                   if (
                     e.key === "-" ||
                     e.key === "+" ||
@@ -792,13 +886,11 @@ export function FilterItem({
                     e.preventDefault();
                     return;
                   }
-                  // Prevent typing 0 as the first character (but allow in numbers like 10, 20, etc.)
                   const input = e.currentTarget;
                   const selectionStart = input.selectionStart || 0;
                   const selectionEnd = input.selectionEnd || 0;
                   const currentValue = input.value;
 
-                  // If typing 0 and it would be the first character (or replacing all text)
                   if (
                     e.key === "0" &&
                     (currentValue === "" ||
@@ -874,9 +966,19 @@ export function FilterItem({
               size={"sm"}
               className="w-full justify-start"
               onClick={() => {
-                setRelativeDateType(RelativeDateType.THIS);
-                setRelativeDateUnit(RelativeDateUnit.DAY);
-                setRelativeDateValue("1");
+                const defaultType = RelativeDateType.THIS;
+                const defaultUnit = RelativeDateUnit.DAY;
+                const defaultValue = "1";
+                setRelativeDateType(defaultType);
+                setRelativeDateUnit(defaultUnit);
+                setRelativeDateValue(defaultValue);
+                // Immediately update filterValue
+                const formatted = formatRelativeDateString(
+                  defaultType,
+                  defaultUnit,
+                  defaultValue
+                );
+                onFilterValueChange(formatted);
               }}
             >
               <CalendarX2 /> Clear

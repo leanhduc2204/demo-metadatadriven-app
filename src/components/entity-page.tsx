@@ -148,7 +148,6 @@ export function EntityPage<T extends { id: number }>({
               searchFields={state.searchFields}
               onSearchFieldsChange={state.setSearchFields}
               getArrayFieldValues={(field: string) => {
-                // Use grouping.getGroupValues if available
                 if (config.grouping?.getGroupValues) {
                   return config.grouping.getGroupValues(field);
                 }
@@ -187,7 +186,6 @@ export function EntityPage<T extends { id: number }>({
                 onHideGroup={state.groupHandlers.onHideGroup}
                 onShowGroup={state.groupHandlers.onShowGroup}
                 lockedColumns={state.lockedColumns}
-                // Calendar props
                 calendarDateField={state.calendarDateField}
                 onCalendarDateFieldChange={
                   state.calendarHandlers.onCalendarDateFieldChange

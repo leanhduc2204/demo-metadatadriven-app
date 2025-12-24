@@ -45,7 +45,6 @@ type SidebarItemConfig = {
   subItems?: SidebarSubItem[];
 };
 
-// Menu items.
 export const items: SidebarItemConfig[] = [
   {
     title: "People",
@@ -110,7 +109,6 @@ export function AppSidebar() {
       }
 
       if (!queryString) {
-        // No query means base route
         return !searchParams.toString();
       }
 
@@ -170,9 +168,6 @@ export function AppSidebar() {
                   manualActiveParent === item.title ||
                   !!autoExpandedParents[item.title];
 
-                // Active logic:
-                // Parent is active if it is expanded AND has sub-items (meaning one of its children is active or it was manually opened)
-                // OR if the current URL matches its direct URL (for items without sub-items like People)
                 const isParentActive =
                   (hasSubItems && isExpanded) || matchesSubRoute(item.url);
 

@@ -67,6 +67,7 @@ export function FilterSortBar({
           <div className="flex items-center gap-2">
             {filters.map((filter) => {
               const Icon = fieldConfig[filter.field]?.icon || UserIcon;
+              console.log(filter, "filter");
               return (
                 <FilterItemBadge
                   key={filter.id}
