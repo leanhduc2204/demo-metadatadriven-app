@@ -8,11 +8,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { FILTER_OPERATOR_OPTIONS } from "@/lib/constants";
+import { FieldType } from "@/lib/field-config";
+import { getAvailableOperators } from "@/lib/filter-operators";
 import { FilterOperator } from "@/types/common";
 import { Check, ChevronDown, X } from "lucide-react";
 
 interface FilterItemPopoverProps {
   label: string;
+  field?: string;
+  fieldType?: FieldType;
   onClose: () => void;
   onSelectOperator: (operator: FilterOperator) => void;
   selectedOperator: FilterOperator;
@@ -22,12 +26,18 @@ interface FilterItemPopoverProps {
 
 export function FilterItemPopover({
   label,
+  field,
+  fieldType,
   onClose,
   onSelectOperator,
   selectedOperator,
   filterValue,
   onFilterValueChange,
 }: FilterItemPopoverProps) {
+  const availableOperators = fieldType
+    ? getAvailableOperators(fieldType, field)
+    : Object.values(FilterOperator);
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center">
@@ -51,7 +61,7 @@ export function FilterItemPopover({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            {Object.values(FilterOperator).map((operator) => (
+            {availableOperators.map((operator) => (
               <DropdownMenuItem
                 key={operator}
                 onClick={() => onSelectOperator(operator)}

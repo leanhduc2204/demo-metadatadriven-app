@@ -140,9 +140,11 @@ export function FilterItemBadge({ filter, icon, label }: FilterItemBadgeProps) {
           </Button>
         </div>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-56 p-0">
+      <PopoverContent align="start" className="w-72 p-0">
         <FilterItemPopover
           label={label}
+          field={filter.field}
+          fieldType={fieldType}
           onClose={() => setOpen(false)}
           onSelectOperator={(operator) => {
             updateFilter(filter.id, { operator });
@@ -150,7 +152,6 @@ export function FilterItemBadge({ filter, icon, label }: FilterItemBadgeProps) {
           selectedOperator={filter.operator}
           filterValue={filter.value}
           onFilterValueChange={(value) => {
-            console.log("value", value);
             updateFilter(filter.id, { value });
           }}
         />

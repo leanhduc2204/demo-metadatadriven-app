@@ -711,6 +711,12 @@ export function FilterItem({
     } catch {}
   };
 
+  const handleClearDate = () => {
+    const now = new Date();
+    const defaultValue = format(now, "dd/MM/yyyy HH:mm");
+    onFilterValueChange(defaultValue);
+  };
+
   return (
     <>
       <div className="flex items-center">
@@ -826,6 +832,15 @@ export function FilterItem({
                 className="[--cell-size:--spacing(9)] md:[--cell-size:--spacing(10)]"
               />
             </div>
+            <Separator />
+            <Button
+              variant={"ghost"}
+              size={"sm"}
+              className="w-full justify-start"
+              onClick={handleClearDate}
+            >
+              <CalendarX2 /> Clear
+            </Button>
           </>
         ) : isRelativeDateOperator ? (
           <>
