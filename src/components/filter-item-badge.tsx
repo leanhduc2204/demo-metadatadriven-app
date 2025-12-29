@@ -11,7 +11,11 @@ import { cn } from "@/lib/utils";
 import { FilterItemPopover } from "./filter-item-popover";
 import { useFilterStore } from "@/stores/use-filter-store";
 import { useState, useMemo } from "react";
-import { fieldConfig, FieldType } from "@/lib/field-config";
+import {
+  fieldConfig,
+  FieldType,
+  getArrayFieldValues,
+} from "@/lib/field-config";
 import { parse, isValid, format } from "date-fns";
 
 interface FilterItemBadgeProps {
@@ -140,11 +144,12 @@ export function FilterItemBadge({ filter, icon, label }: FilterItemBadgeProps) {
           </Button>
         </div>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 p-0">
+      <PopoverContent align="start" className="w-80 p-0">
         <FilterItemPopover
           label={label}
           field={filter.field}
           fieldType={fieldType}
+          arrayFieldValues={getArrayFieldValues(filter.field)}
           onClose={() => setOpen(false)}
           onSelectOperator={(operator) => {
             updateFilter(filter.id, { operator });
