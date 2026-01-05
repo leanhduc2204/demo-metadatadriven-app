@@ -183,8 +183,11 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       type="button"
                       tooltip={item.title}
-                      isActive={isParentActive}
                       onClick={() => handleParentClick(item)}
+                      className={cn(
+                        "hover:bg-neutral-300/50 hover:text-neutral-900",
+                        isParentActive && "bg-neutral-300/50 text-neutral-900"
+                      )}
                     >
                       <item.icon />
                       <span>{item.title}</span>
@@ -205,8 +208,8 @@ export function AppSidebar() {
                                     className={cn(
                                       "flex size-7 items-center justify-center rounded-md border border-transparent transition-colors",
                                       isSubActive
-                                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:border-sidebar-border opacity-50"
+                                        ? "bg-neutral-300/50 text-neutral-900"
+                                        : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 opacity-50"
                                     )}
                                     onClick={() =>
                                       handleSubItemClick(subItem.url)
@@ -224,16 +227,27 @@ export function AppSidebar() {
                         </div>
                       ) : (
                         <SidebarMenuSub>
-                          {item.subItems?.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton asChild size="sm">
-                                <a href={subItem.url}>
-                                  <subItem.icon className="size-4" />
-                                  <span>{subItem.title}</span>
-                                </a>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
+                          {item.subItems?.map((subItem) => {
+                            const isSubActive = matchesSubRoute(subItem.url);
+                            return (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  size="sm"
+                                  className={cn(
+                                    "hover:bg-neutral-300/50 hover:text-neutral-900",
+                                    isSubActive &&
+                                      "bg-neutral-300/50 text-neutral-900"
+                                  )}
+                                >
+                                  <a href={subItem.url}>
+                                    <subItem.icon className="size-4" />
+                                    <span>{subItem.title}</span>
+                                  </a>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
                         </SidebarMenuSub>
                       ))}
                   </SidebarMenuItem>

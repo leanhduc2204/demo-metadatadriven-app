@@ -37,7 +37,7 @@ export default function RootLayout({
           </Suspense>
           <SidebarInset className="overflow-hidden">
             <AppHeader />
-            <div className="flex-1 overflow-auto p-4 bg-neutral-100 h-full">
+            <div className="flex-1 overflow-auto p-4 px-2 bg-neutral-100 h-full">
               {children}
             </div>
           </SidebarInset>
