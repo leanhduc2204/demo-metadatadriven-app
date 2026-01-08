@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/purity */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Slot } from "@radix-ui/react-slot";
