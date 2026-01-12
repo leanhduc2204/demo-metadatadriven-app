@@ -7,12 +7,15 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetHeader } from "./ui/sheet";
+import { workspaceTabsConfig } from "@/lib/workspace-tabs-config";
+import { WorkspaceTabBar } from "./workspace-tabbar";
 
 export function AppHeader() {
   const pathname = usePathname();
   const item = items.find((item) => item.url === pathname) || items[0];
   const Icon = item.icon;
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTabId, setActiveTabId] = useState("home");
 
   const newTitle = useMemo(() => {
     switch (item.title) {
@@ -26,6 +29,21 @@ export function AppHeader() {
         return "Record";
     }
   }, [item.title]);
+
+  const workspaceKey = useMemo(() => {
+    return item.title.toLowerCase().replace(/\s+/g, "");
+  }, [item.title]);
+
+  const tabs = useMemo(() => {
+    return workspaceTabsConfig[workspaceKey] || workspaceTabsConfig.people;
+  }, [workspaceKey]);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      setActiveTabId("home");
+    }
+  };
 
   return (
     <>
@@ -53,17 +71,22 @@ export function AppHeader() {
         </div>
       </header>
 
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md">
-          <SheetHeader className="bg-neutral-100 border-b flex-row">
+      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg p-0 flex flex-col gap-2"
+        >
+          <SheetHeader className="bg-neutral-100 border-b flex-row px-4 py-3">
             <div className="flex items-center gap-2">
               <Button
+                variant={"outline"}
                 className="bg-neutral-200 size-7 text-neutral-900 hover:bg-neutral-300"
                 onClick={() => setIsOpen(false)}
               >
                 <ChevronLeft />
               </Button>
               <Button
+                value={"outline"}
                 className="bg-neutral-200 text-neutral-900 h-7 disabled:opacity-100"
                 disabled
               >
@@ -74,11 +97,21 @@ export function AppHeader() {
               </Button>
             </div>
           </SheetHeader>
-          <div className="mt-6 space-y-4">
-            {/* Nội dung form sẽ được thêm vào đây */}
-            <p className="text-sm text-neutral-500">
-              Form tạo bản ghi mới sẽ được thêm vào đây...
-            </p>
+
+          <WorkspaceTabBar
+            tabs={tabs}
+            activeTabId={activeTabId}
+            onTabChange={setActiveTabId}
+          />
+
+          <div className="flex-1 overflow-y-auto px-4 py-6">
+            <div className="space-y-4">
+              {/* Render content dựa trên activeTabId */}
+              <p className="text-sm text-neutral-500">
+                Active tab: {activeTabId}
+              </p>
+              {/* Form fields sẽ được render ở đây dựa trên activeTabId */}
+            </div>
           </div>
         </SheetContent>
       </Sheet>

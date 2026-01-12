@@ -12,6 +12,7 @@ import {
   timeFromNow,
 } from "./format";
 import { COLUMN_IDS, VIEW_TYPES } from "./constants";
+import { LucideIcon } from "lucide-react";
 
 export type EntityViewPreset<T> = {
   view?: typeof VIEW_TYPES.ALL | typeof VIEW_TYPES.GROUPED;
@@ -72,6 +73,16 @@ export interface EntityConfig<T> {
     calendar?: (value: any, row: T) => ReactNode;
     table?: (value: any, row: T) => ReactNode;
   };
+}
+
+export interface TabConfig {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+export interface WorkspaceTabConfig {
+  [workspaceKey: string]: TabConfig[];
 }
 
 // Opportunity Config
